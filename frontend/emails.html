@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexCRM — Emails</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-mark">N</span><span class="logo-text">NexCRM</span></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+      <a href="contacts.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Contacts</span></a>
+      <a href="deals.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Deals</span></a>
+      <a href="tasks.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tasks</span></a>
+      <a href="emails.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>Emails</span></a>
+      <a href="notes.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><span>Notes</span></a>
+      <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Reports</span></a>
+    </nav>
+    <div class="sidebar-footer"><a href="settings.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg><span>Settings</span></a></div>
+  </aside>
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <h1 class="page-title">Email Log</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search..." id="globalSearch" onkeyup="globalSearch(this.value)"></div>
+        <button class="btn-primary" onclick="openLogEmail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Log Email</button>
+      </div>
+    </header>
+    <div class="page-body">
+      <div style="background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;font-size:13.5px;color:var(--accent)">
+        💡 <strong>Email Log</strong> — Track all your email communications. Log emails you've sent, and use the compose button to open your email client with a pre-filled draft.
+      </div>
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="filter-input" placeholder="Filter emails..." id="emailFilter" oninput="renderEmails()">
+        </div>
+        <div class="toolbar-right">
+          <span id="emailCount" style="font-size:13px;color:var(--text-3)"></span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>To</th><th>Subject</th><th>Contact</th><th>Type</th><th>Sent</th><th></th></tr></thead>
+          <tbody id="emailsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Log Email Modal -->
+<div class="modal-overlay" id="emailModal" onclick="closeModal(event)">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>Log / Send Email</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group"><label>Contact</label>
+      <select id="e_contact" onchange="fillContactEmail()"><option value="">Choose contact...</option></select>
+    </div>
+    <div class="form-group"><label>To (Email Address) *</label><input type="email" id="e_to" placeholder="recipient@company.com"></div>
+    <div class="form-group"><label>Subject *</label><input type="text" id="e_subject" placeholder="Following up on our conversation..."></div>
+    <div class="form-group"><label>Type</label>
+      <select id="e_type"><option>Follow-up</option><option>Proposal</option><option>Cold Outreach</option><option>Check-in</option><option>Thank You</option><option>Meeting Request</option><option>Other</option></select>
+    </div>
+    <div class="form-group"><label>Body / Notes</label><textarea id="e_body" placeholder="Email content or notes about what was discussed..." style="min-height:120px"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-secondary" onclick="openInMailClient()">📧 Open in Mail App</button>
+      <button class="btn-primary" onclick="logEmail()">Log Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Detail -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="emailDetail">
+  <div class="detail-header">
+    <div class="detail-name" id="eDetailSubject"></div>
+    <button class="btn-icon" onclick="closeDetail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div id="eDetailBody"></div>
+</div>
+
+<div class="search-results" id="searchResults"></div>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+function renderEmails() {
+  const q = document.getElementById('emailFilter').value.toLowerCase();
+  let emails = DB.getEmails();
+  if (q) emails = emails.filter(e => e.subject?.toLowerCase().includes(q) || e.to?.toLowerCase().includes(q));
+  document.getElementById('emailCount').textContent = `${emails.length} email${emails.length !== 1 ? 's' : ''}`;
+  if (emails.length === 0) {
+    document.getElementById('emailsTable').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-3)">No emails logged yet. <a href="#" onclick="openLogEmail()" style="color:var(--accent)">Log your first email →</a></td></tr>`;
+    return;
+  }
+  document.getElementById('emailsTable').innerHTML = emails.map(e => {
+    const c = e.contactId ? DB.getContact(e.contactId) : null;
+    return `<tr onclick="showEmail('${e.id}')">
+      <td><a href="mailto:${e.to}" onclick="event.stopPropagation()" style="color:var(--accent)">${e.to}</a></td>
+      <td style="font-weight:500">${e.subject}</td>
+      <td>${c ? `<div style="display:flex;align-items:center;gap:6px">${avatarHTML(c.name,22)}<span style="font-size:13px">${c.name}</span></div>` : '—'}</td>
+      <td><span class="tag tag-blue">${e.type||'Email'}</span></td>
+      <td style="font-size:12.5px;color:var(--text-3)">${relativeTime(e.sentAt)}</td>
+      <td><button class="btn-icon" onclick="event.stopPropagation();deleteEmail('${e.id}')" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2 2 0 0 1-2,2H8a2 2 0 0 1-2-2L5,6"/></svg></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openLogEmail() {
+  const contacts = DB.getContacts();
+  document.getElementById('e_contact').innerHTML = '<option value="">Choose contact...</option>' + contacts.map(c=>`<option value="${c.id}" data-email="${c.email||''}">${c.name}</option>`).join('');
+  ['to','subject','body'].forEach(f => document.getElementById('e_'+f).value = '');
+  document.getElementById('e_type').value = 'Follow-up';
+  const cId = getParam('contact');
+  if (cId) {
+    document.getElementById('e_contact').value = cId;
+    fillContactEmail();
+  }
+  openModal('emailModal');
+}
+
+function fillContactEmail() {
+  const sel = document.getElementById('e_contact');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.email) document.getElementById('e_to').value = opt.dataset.email;
+}
+
+function logEmail() {
+  const to = document.getElementById('e_to').value.trim();
+  const subject = document.getElementById('e_subject').value.trim();
+  if (!to || !subject) { toast('To and Subject are required', 'error'); return; }
+  DB.addEmail({ to, subject, body: document.getElementById('e_body').value.trim(), type: document.getElementById('e_type').value, contactId: document.getElementById('e_contact').value || null });
+  toast('Email logged', 'success');
+  closeModal();
+  renderEmails();
+}
+
+function openInMailClient() {
+  const to = document.getElementById('e_to').value.trim();
+  const subject = document.getElementById('e_subject').value.trim();
+  const body = document.getElementById('e_body').value.trim();
+  if (!to) { toast('Enter recipient email first', 'error'); return; }
+  window.open(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  if (to && subject) logEmail();
+}
+
+function showEmail(id) {
+  const e = DB.getEmails().find(x => x.id === id);
+  if (!e) return;
+  const c = e.contactId ? DB.getContact(e.contactId) : null;
+  document.getElementById('eDetailSubject').textContent = e.subject;
+  document.getElementById('eDetailBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-field"><span class="detail-field-label">To</span><span class="detail-field-value"><a href="mailto:${e.to}">${e.to}</a></span></div>
+      ${c ? `<div class="detail-field"><span class="detail-field-label">Contact</span><span class="detail-field-value">${c.name}</span></div>` : ''}
+      <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value"><span class="tag tag-blue">${e.type||'Email'}</span></span></div>
+      <div class="detail-field"><span class="detail-field-label">Sent</span><span class="detail-field-value">${formatDate(e.sentAt)} · ${relativeTime(e.sentAt)}</span></div>
+    </div>
+    ${e.body ? `<div class="detail-section"><div class="detail-section-title">Body / Notes</div><p style="font-size:13.5px;color:var(--text-2);line-height:1.6;white-space:pre-wrap">${e.body}</p></div>` : ''}
+    <div class="detail-section" style="border-bottom:none">
+      <button class="btn-danger" onclick="deleteEmail('${id}')">Delete</button>
+    </div>
+  `;
+  openDetail('emailDetail');
+}
+
+function deleteEmail(id) {
+  if (!confirm('Delete this email log?')) return;
+  DB.deleteEmail(id);
+  toast('Email deleted');
+  closeDetail();
+  renderEmails();
+}
+
+if (getParam('new') === '1' || getParam('contact')) setTimeout(openLogEmail, 100);
+renderEmails();
+</script>
+</body>
+</html>

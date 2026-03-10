@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexCRM — Notes</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><span class="logo-mark">N</span><span class="logo-text">NexCRM</span></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+      <a href="contacts.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Contacts</span></a>
+      <a href="deals.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Deals</span></a>
+      <a href="tasks.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Tasks</span></a>
+      <a href="emails.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>Emails</span></a>
+      <a href="notes.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Notes</span></a>
+      <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Reports</span></a>
+    </nav>
+    <div class="sidebar-footer"><a href="settings.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg><span>Settings</span></a></div>
+  </aside>
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <h1 class="page-title">Notes</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search..." id="globalSearch" onkeyup="globalSearch(this.value)"></div>
+        <button class="btn-primary" onclick="openAddNote()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Note</button>
+      </div>
+    </header>
+    <div class="page-body">
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <input type="text" class="filter-input" placeholder="Search notes..." id="noteFilter" oninput="renderNotes()">
+        </div>
+        <div class="toolbar-right"><span id="noteCount" style="font-size:13px;color:var(--text-3)"></span></div>
+      </div>
+      <div id="notesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Note Modal -->
+<div class="modal-overlay" id="noteModal" onclick="closeModal(event)">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3 id="noteModalTitle">Add Note</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group"><label>Title *</label><input type="text" id="n_title" placeholder="Call recap, Meeting notes..."></div>
+    <div class="form-group"><label>Linked Contact</label>
+      <select id="n_contact"><option value="">No contact linked</option></select>
+    </div>
+    <div class="form-group"><label>Note *</label><textarea id="n_body" placeholder="Write your note here..." style="min-height:160px"></textarea></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<div class="search-results" id="searchResults"></div>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+let editingNoteId = null;
+
+function renderNotes() {
+  const q = document.getElementById('noteFilter').value.toLowerCase();
+  let notes = DB.getNotes();
+  if (q) notes = notes.filter(n => n.title?.toLowerCase().includes(q) || n.body?.toLowerCase().includes(q));
+  document.getElementById('noteCount').textContent = `${notes.length} note${notes.length !== 1 ? 's' : ''}`;
+  if (notes.length === 0) {
+    document.getElementById('notesGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)">No notes yet. <a href="#" onclick="openAddNote()" style="color:var(--accent)">Add your first note →</a></div>`;
+    return;
+  }
+  document.getElementById('notesGrid').innerHTML = notes.map(n => {
+    const c = n.contactId ? DB.getContact(n.contactId) : null;
+    return `
+      <div class="note-card" onclick="openEditNote('${n.id}')">
+        <div class="note-header">
+          <div class="note-title">${n.title}</div>
+          <div class="note-date">${relativeTime(n.createdAt)}</div>
+        </div>
+        <div class="note-body">${n.body?.substring(0,180)}${n.body?.length > 180 ? '...' : ''}</div>
+        ${c ? `<div class="note-contact">📎 ${c.name}</div>` : ''}
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;gap:6px" onclick="event.stopPropagation()">
+          <button class="btn-icon" title="Delete" onclick="deleteNote('${n.id}')" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2 2 0 0 1-2,2H8a2 2 0 0 1-2-2L5,6"/></svg></button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openAddNote() {
+  editingNoteId = null;
+  document.getElementById('noteModalTitle').textContent = 'Add Note';
+  ['title','body'].forEach(f => document.getElementById('n_'+f).value = '');
+  const contacts = DB.getContacts();
+  document.getElementById('n_contact').innerHTML = '<option value="">No contact linked</option>' + contacts.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  openModal('noteModal');
+  setTimeout(() => document.getElementById('n_title').focus(), 100);
+}
+
+function openEditNote(id) {
+  const n = DB.getNotes().find(x => x.id === id);
+  if (!n) return;
+  editingNoteId = id;
+  document.getElementById('noteModalTitle').textContent = 'Edit Note';
+  document.getElementById('n_title').value = n.title || '';
+  document.getElementById('n_body').value = n.body || '';
+  const contacts = DB.getContacts();
+  document.getElementById('n_contact').innerHTML = '<option value="">No contact linked</option>' + contacts.map(c=>`<option value="${c.id}" ${c.id === n.contactId ? 'selected':''}>${c.name}</option>`).join('');
+  openModal('noteModal');
+}
+
+function saveNote() {
+  const title = document.getElementById('n_title').value.trim();
+  const body = document.getElementById('n_body').value.trim();
+  if (!title || !body) { toast('Title and body required', 'error'); return; }
+  const cId = document.getElementById('n_contact').value || null;
+  const c = cId ? DB.getContact(cId) : null;
+  const data = { title, body, contactId: cId, contactName: c ? c.name : '' };
+  if (editingNoteId) {
+    DB.updateNote(editingNoteId, data);
+    toast('Note updated', 'success');
+  } else {
+    DB.addNote(data);
+    toast('Note saved', 'success');
+  }
+  closeModal();
+  renderNotes();
+}
+
+function deleteNote(id) {
+  if (!confirm('Delete this note?')) return;
+  DB.deleteNote(id);
+  toast('Note deleted');
+  renderNotes();
+}
+
+if (getParam('new') === '1') setTimeout(openAddNote, 100);
+renderNotes();
+</script>
+</body>
+</html>
