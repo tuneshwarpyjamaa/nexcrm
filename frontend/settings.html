@@ -33,11 +33,12 @@
       </div>
     </header>
     <div class="page-body">
-      <div style="max-width:600px">
+      <div style="display:flex;gap:24px">
+        <div style="flex:1;max-width:600px">
 
         <!-- Business Info -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-header"><h2>Business Info</h2></div>
+        <div class="card" style="margin-bottom:16px" id="profileCard">
+          <div class="card-header"><h2>Profile & Preferences</h2></div>
           <div class="form-group"><label>Business Name</label><input type="text" id="s_bizName" placeholder="My Company Inc."></div>
           <div class="form-group"><label>Your Name</label><input type="text" id="s_userName" placeholder="Your name"></div>
           <div class="form-group"><label>Email</label><input type="email" id="s_email" placeholder="you@company.com"></div>
@@ -47,7 +48,7 @@
               <select id="s_fyStart"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
             </div>
           </div>
-          <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+          <button id="saveBtn" class="btn-primary" onclick="saveSettings()">Save Settings</button>
         </div>
 
         <!-- Data Stats -->
@@ -55,8 +56,8 @@
           <div class="card-header"><h2>Your Data</h2></div>
           <div id="dataStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn-secondary" onclick="exportAll()">📦 Export All Data (JSON)</button>
-            <label class="btn-secondary" style="cursor:pointer">📥 Import Backup
+            <button class="btn-secondary" onclick="exportAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export All Data (JSON)</button>
+            <label class="btn-primary" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8.5 12,3.5 7,8.5"/><line x1="12" y1="3.5" x2="12" y2="15.5"/></svg> Import Backup
               <input type="file" accept=".json" style="display:none" onchange="importBackup(this)">
             </label>
           </div>
@@ -75,6 +76,13 @@
         </div>
 
       </div>
+        <div style="width:280px">
+          <div class="card">
+            <div class="card-header"><h2>Account Summary</h2></div>
+            <div id="summaryContent"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -90,6 +98,15 @@ async function loadSettings() {
   document.getElementById('s_currency').value = s.currency || '₹';
   document.getElementById('s_fyStart').value = s.fyStart || 'April';
 
+  document.getElementById('summaryContent').innerHTML = `
+    <div style="margin-bottom:8px"><strong>Name:</strong> ${s.userName || '<span style="color:var(--text-3)">—</span>'}</div>
+    <div style="margin-bottom:8px"><strong>Email:</strong> ${s.email || '<span style="color:var(--text-3)">—</span>'}</div>
+    <div style="margin-bottom:8px"><strong>Business:</strong> ${s.bizName || '<span style="color:var(--text-3)">—</span>'}</div>
+    <div style="margin-bottom:8px"><strong>Version:</strong> v1.0</div>
+    <div><strong>Plan:</strong> Free</div>
+    <div style="margin-top:12px"><a href="#" onclick="document.getElementById('profileCard').scrollIntoView({behavior:'smooth'}); document.getElementById('s_bizName').focus();" style="color:var(--accent);font-size:12px;text-decoration:none">Complete your profile →</a></div>
+  `;
+
   const contacts = await DB.getContacts();
   const deals = await DB.getDeals();
   const tasks = await DB.getTasks();
@@ -98,9 +115,14 @@ async function loadSettings() {
   const c = contacts.length, d = deals.length, t = tasks.length;
   const n = notes.length, e = emails.length;
   document.getElementById('dataStats').innerHTML = [
-    { l: 'Contacts', v: c }, { l: 'Deals', v: d }, { l: 'Tasks', v: t }, { l: 'Notes', v: n }, { l: 'Emails', v: e },
-    { l: 'Storage Used', v: (JSON.stringify(localStorage).length / 1024).toFixed(1) + ' KB' },
-  ].map(m => `<div style="text-align:center;padding:12px;background:var(--bg);border-radius:var(--radius-sm)">
+    { l: 'Contacts', v: c, icon: '👤', bg: 'rgba(59, 130, 246, 0.1)' }, 
+    { l: 'Deals', v: d, icon: '💼', bg: 'rgba(34, 197, 94, 0.1)' }, 
+    { l: 'Tasks', v: t, icon: '✅', bg: 'rgba(234, 179, 8, 0.1)' }, 
+    { l: 'Notes', v: n, icon: '📝', bg: 'rgba(147, 51, 234, 0.1)' }, 
+    { l: 'Emails', v: e, icon: '✉️', bg: 'rgba(249, 115, 22, 0.1)' },
+    { l: 'Storage Used', v: (JSON.stringify(localStorage).length / 1024).toFixed(1) + ' KB', icon: '💾', bg: 'rgba(156, 163, 175, 0.1)' },
+  ].map(m => `<div style="text-align:center;padding:12px;background:${m.bg};border-radius:var(--radius-sm)">
+    <div style="font-size:24px;margin-bottom:4px">${m.icon}</div>
     <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--accent)">${m.v}</div>
     <div style="font-size:11.5px;color:var(--text-3);margin-top:2px">${m.l}</div>
   </div>`).join('');
@@ -115,6 +137,9 @@ function saveSettings() {
     fyStart: document.getElementById('s_fyStart').value,
   });
   toast('Settings saved', 'success');
+  const btn = document.getElementById('saveBtn');
+  btn.innerHTML = '✓ Saved!';
+  setTimeout(() => btn.innerHTML = 'Save Settings', 2000);
 }
 
 function exportAll() {
