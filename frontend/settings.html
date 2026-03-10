@@ -81,16 +81,21 @@
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>
 <script>
-function loadSettings() {
-  const s = DB.getSettings();
+async function loadSettings() {
+  const s = await DB.getSettings();
   document.getElementById('s_bizName').value = s.bizName || '';
   document.getElementById('s_userName').value = s.userName || '';
   document.getElementById('s_email').value = s.email || '';
   document.getElementById('s_currency').value = s.currency || '₹';
   document.getElementById('s_fyStart').value = s.fyStart || 'April';
 
-  const c = DB.getContacts().length, d = DB.getDeals().length, t = DB.getTasks().length;
-  const n = DB.getNotes().length, e = DB.getEmails().length;
+  const contacts = await DB.getContacts();
+  const deals = await DB.getDeals();
+  const tasks = await DB.getTasks();
+  const notes = await DB.getNotes();
+  const emails = await DB.getEmails();
+  const c = contacts.length, d = deals.length, t = tasks.length;
+  const n = notes.length, e = emails.length;
   document.getElementById('dataStats').innerHTML = [
     { l: 'Contacts', v: c }, { l: 'Deals', v: d }, { l: 'Tasks', v: t }, { l: 'Notes', v: n }, { l: 'Emails', v: e },
     { l: 'Storage Used', v: (JSON.stringify(localStorage).length / 1024).toFixed(1) + ' KB' },
