@@ -38,11 +38,11 @@
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>
 <script>
-function renderReports() {
-  const contacts = DB.getContacts();
-  const deals = DB.getDeals();
-  const tasks = DB.getTasks();
-  const emails = DB.getEmails();
+async function renderReports() {
+  const contacts = await DB.getContacts();
+  const deals = await DB.getDeals();
+  const tasks = await DB.getTasks();
+  const emails = await DB.getEmails();
 
   const won = deals.filter(d => d.stage === 'Won');
   const lost = deals.filter(d => d.stage === 'Lost');

@@ -51,7 +51,9 @@ async function renderKanban(deals, contacts) {
     const stageDeal = deals.filter(d => d.stage === stage);
     const stageVal = stageDeal.reduce((s,d) => s + parseFloat(d.value||0), 0);
     return `
-      <div class="kanban-col">
+      <div class="kanban-col" data-stage="${stage}"
+           ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)"
+           ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
         <div class="kanban-col-header">
           <span class="kanban-col-title" style="color:${STAGE_COLORS[stage]}">${stage}</span>
           <div style="display:flex;align-items:center;gap:6px">
@@ -62,7 +64,9 @@ async function renderKanban(deals, contacts) {
         ${stageDeal.map(d => {
           const c = contacts.find(c => c.id === d.contactId);
           return `
-            <div class="kanban-card" onclick="showDeal('${d.id}')">
+            <div class="kanban-card" draggable="true" data-deal-id="${d.id}"
+                 ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)"
+                 onclick="showDeal('${d.id}')">
               <div class="kanban-card-title">${d.title}</div>
               <div class="kanban-card-company">${d.company || (c ? c.company : '') || '—'}</div>
               <div class="kanban-card-footer">
@@ -77,6 +81,90 @@ async function renderKanban(deals, contacts) {
       </div>
     `;
   }).join('');
+}
+
+// =============================================
+// Drag & Drop Handlers
+// =============================================
+let draggedDealId = null;
+let draggedCard = null;
+
+function handleDragStart(e) {
+  draggedDealId = e.currentTarget.dataset.dealId;
+  draggedCard = e.currentTarget;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', draggedDealId);
+  // Delay adding the class so the drag image captures the card before it fades
+  requestAnimationFrame(() => {
+    draggedCard.classList.add('dragging');
+  });
+}
+
+function handleDragEnd(e) {
+  if (draggedCard) draggedCard.classList.remove('dragging');
+  // Clean up all columns
+  document.querySelectorAll('.kanban-col').forEach(col => {
+    col.classList.remove('drag-over');
+  });
+  document.querySelectorAll('.kanban-drop-placeholder').forEach(p => p.remove());
+  draggedDealId = null;
+  draggedCard = null;
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragEnter(e) {
+  e.preventDefault();
+  const col = e.target.closest('.kanban-col');
+  if (!col) return;
+  // Only highlight if it's a different column
+  const sourceStage = draggedCard?.closest('.kanban-col')?.dataset.stage;
+  if (col.dataset.stage !== sourceStage) {
+    col.classList.add('drag-over');
+  }
+  // Add placeholder if not already present
+  if (!col.querySelector('.kanban-drop-placeholder')) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'kanban-drop-placeholder';
+    const addBtn = col.querySelector('.add-deal-btn');
+    if (addBtn) col.insertBefore(placeholder, addBtn);
+    else col.appendChild(placeholder);
+  }
+}
+
+function handleDragLeave(e) {
+  const col = e.target.closest('.kanban-col');
+  if (!col) return;
+  // Only remove if we're actually leaving the column
+  const related = e.relatedTarget?.closest('.kanban-col');
+  if (related !== col) {
+    col.classList.remove('drag-over');
+    const placeholder = col.querySelector('.kanban-drop-placeholder');
+    if (placeholder) placeholder.remove();
+  }
+}
+
+async function handleDrop(e) {
+  e.preventDefault();
+  const col = e.target.closest('.kanban-col');
+  if (!col || !draggedDealId) return;
+  const newStage = col.dataset.stage;
+  const sourceStage = draggedCard?.closest('.kanban-col')?.dataset.stage;
+
+  // Clean up visuals
+  col.classList.remove('drag-over');
+  document.querySelectorAll('.kanban-drop-placeholder').forEach(p => p.remove());
+
+  // Only update if moved to a different stage
+  if (newStage && newStage !== sourceStage) {
+    await DB.updateDeal(draggedDealId, { stage: newStage });
+    await DB.addActivity('deal', `Deal moved to <strong>${newStage}</strong>`, newStage === 'Won' ? 'green' : 'yellow');
+    toast(`Moved to ${newStage}`, 'success');
+    renderDeals();
+  }
 }
 
 async function renderList(deals, contacts) {

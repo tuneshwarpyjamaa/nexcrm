@@ -41,7 +41,7 @@
           <div class="form-group"><label>Your Name</label><input type="text" id="s_userName" placeholder="Your name"></div>
           <div class="form-group"><label>Email</label><input type="email" id="s_email" placeholder="you@company.com"></div>
           <div class="form-row">
-            <div class="form-group"><label>Currency Symbol</label><input type="text" id="s_currency" placeholder="$" maxlength="3"></div>
+            <div class="form-group"><label>Currency Symbol</label><input type="text" id="s_currency" placeholder="₹" maxlength="3"></div>
             <div class="form-group"><label>Fiscal Year Start</label>
               <select id="s_fyStart"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
             </div>
@@ -86,8 +86,8 @@ function loadSettings() {
   document.getElementById('s_bizName').value = s.bizName || '';
   document.getElementById('s_userName').value = s.userName || '';
   document.getElementById('s_email').value = s.email || '';
-  document.getElementById('s_currency').value = s.currency || '$';
-  document.getElementById('s_fyStart').value = s.fyStart || 'January';
+  document.getElementById('s_currency').value = s.currency || '₹';
+  document.getElementById('s_fyStart').value = s.fyStart || 'April';
 
   const c = DB.getContacts().length, d = DB.getDeals().length, t = DB.getTasks().length;
   const n = DB.getNotes().length, e = DB.getEmails().length;
@@ -105,7 +105,7 @@ function saveSettings() {
     bizName: document.getElementById('s_bizName').value.trim(),
     userName: document.getElementById('s_userName').value.trim(),
     email: document.getElementById('s_email').value.trim(),
-    currency: document.getElementById('s_currency').value.trim() || '$',
+    currency: document.getElementById('s_currency').value.trim() || '₹',
     fyStart: document.getElementById('s_fyStart').value,
   });
   toast('Settings saved', 'success');

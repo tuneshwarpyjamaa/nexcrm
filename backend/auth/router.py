@@ -5,6 +5,7 @@ import os
 import asyncpg
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
+from auth.schemas import UserLogin, UserCreate, Token
 from db import get_pool
 
 router = APIRouter(prefix="/api")
@@ -41,13 +42,11 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
-@router.post("/login")
-async def login(user: dict):
-    email = user.get("email")
-    password = user.get("password")
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="Email and password required")
-    
+@router.post("/login", response_model=Token)
+async def login(user: UserLogin):
+    email = user.email
+    password = user.password
+
     pool = await get_pool()
     async with pool.acquire() as conn:
         row = await conn.fetchrow("SELECT password_hash FROM users WHERE email = $1", email)
@@ -61,12 +60,10 @@ async def login(user: dict):
         return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register")
-async def register(user: dict):
-    name = user.get("name")
-    email = user.get("email")
-    password = user.get("password")
-    if not name or not email or not password:
-        raise HTTPException(status_code=400, detail="Name, email, and password required")
+async def register(user: UserCreate):
+    name = user.name
+    email = user.email
+    password = user.password
     
     hashed_password = get_password_hash(password)
     pool = await get_pool()

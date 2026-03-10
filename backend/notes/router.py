@@ -25,7 +25,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 async def get_notes(current_user: str = Depends(verify_token)):
     pool = await get_pool()
     async with pool.acquire() as conn:
-        rows = await conn.fetch("SELECT * FROM notes ORDER BY createdAt DESC")
+        rows = await conn.fetch('SELECT * FROM notes ORDER BY notes."createdAt" DESC')
         return [dict(row) for row in rows]
 
 @router.post("/notes")
@@ -38,7 +38,7 @@ async def create_note(note: dict, current_user: str = Depends(verify_token)):
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute(
-            "INSERT INTO notes (id, title, body, contactId, contactName, createdAt) VALUES ($1, $2, $3, $4, $5, $6)",
+            'INSERT INTO notes (id, title, body, "contactId", "contactName", "createdAt") VALUES ($1, $2, $3, $4, $5, $6)',
             id, title, note.get("body"), note.get("contactId"), note.get("contactName"), createdAt
         )
         row = await conn.fetchrow("SELECT * FROM notes WHERE id = $1", id)
@@ -47,7 +47,7 @@ async def create_note(note: dict, current_user: str = Depends(verify_token)):
 @router.put("/notes/{id}")
 async def update_note(id: str, updates: dict, current_user: str = Depends(verify_token)):
     updates["updatedAt"] = datetime.now()
-    fields = ", ".join(f"{k} = ${i+2}" for i, k in enumerate(updates.keys()))
+    fields = ", ".join(f'"{k}" = ${i+2}' for i, k in enumerate(updates.keys()))
     values = list(updates.values())
     values.insert(0, id)
     pool = await get_pool()

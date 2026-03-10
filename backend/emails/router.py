@@ -25,7 +25,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 async def get_emails(current_user: str = Depends(verify_token)):
     pool = await get_pool()
     async with pool.acquire() as conn:
-        rows = await conn.fetch("SELECT * FROM emails ORDER BY sentAt DESC")
+        rows = await conn.fetch('SELECT * FROM emails ORDER BY emails."sentAt" DESC')
         return [dict(row) for row in rows]
 
 @router.post("/emails")
@@ -38,7 +38,7 @@ async def create_email(email: dict, current_user: str = Depends(verify_token)):
     pool = await get_pool()
     async with pool.acquire() as conn:
         await conn.execute(
-            "INSERT INTO emails (id, to_email, subject, body, sentAt) VALUES ($1, $2, $3, $4, $5)",
+            'INSERT INTO emails (id, to_email, subject, body, "sentAt") VALUES ($1, $2, $3, $4, $5)',
             id, to, email.get("subject"), email.get("body"), sentAt
         )
         row = await conn.fetchrow("SELECT * FROM emails WHERE id = $1", id)

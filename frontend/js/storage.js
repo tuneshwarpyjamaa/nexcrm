@@ -224,5 +224,4 @@ const DB = {
   },
 };
 
-// Run seed on first load
-DB.seed();
+

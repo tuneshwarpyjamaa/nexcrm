@@ -113,11 +113,12 @@ function dueBadge(dateStr) {
 
 // ---- Currency ----
 function formatMoney(n) {
-  if (!n) return '$0';
+  if (!n) return '₹0';
   const num = parseFloat(n);
-  if (num >= 1000000) return '$' + (num/1000000).toFixed(1) + 'M';
-  if (num >= 1000) return '$' + (num/1000).toFixed(1) + 'K';
-  return '$' + num.toLocaleString();
+  if (num >= 10000000) return '₹' + (num/10000000).toFixed(1) + 'Cr';
+  if (num >= 100000) return '₹' + (num/100000).toFixed(1) + 'L';
+  if (num >= 1000) return '₹' + (num/1000).toFixed(1) + 'K';
+  return '₹' + num.toLocaleString('en-IN');
 }
 
 // ---- Stage Colors ----
@@ -153,15 +154,18 @@ function globalSearch(q) {
   clearTimeout(searchTimer);
   const box = document.getElementById('searchResults');
   if (!q || q.length < 2) { box.classList.remove('open'); return; }
-  searchTimer = setTimeout(() => {
+  searchTimer = setTimeout(async () => {
     const results = [];
-    DB.getContacts().filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || (c.company||'').toLowerCase().includes(q.toLowerCase())).slice(0,4).forEach(c => {
+    const contacts = await DB.getContacts();
+    const deals = await DB.getDeals();
+    const tasks = await DB.getTasks();
+    contacts.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || (c.company||'').toLowerCase().includes(q.toLowerCase())).slice(0,4).forEach(c => {
       results.push({ type: 'Contact', name: c.name, sub: c.company, link: 'contacts.html', id: c.id, icon: 'contact' });
     });
-    DB.getDeals().filter(d => d.title.toLowerCase().includes(q.toLowerCase())).slice(0,3).forEach(d => {
+    deals.filter(d => d.title.toLowerCase().includes(q.toLowerCase())).slice(0,3).forEach(d => {
       results.push({ type: 'Deal', name: d.title, sub: formatMoney(d.value), link: 'deals.html', id: d.id, icon: 'deal' });
     });
-    DB.getTasks().filter(t => t.title.toLowerCase().includes(q.toLowerCase())).slice(0,3).forEach(t => {
+    tasks.filter(t => t.title.toLowerCase().includes(q.toLowerCase())).slice(0,3).forEach(t => {
       results.push({ type: 'Task', name: t.title, sub: t.dueDate || '', link: 'tasks.html', id: t.id, icon: 'task' });
     });
 
