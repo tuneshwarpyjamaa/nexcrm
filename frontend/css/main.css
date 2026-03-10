@@ -1491,6 +1491,79 @@ tbody tr { cursor: pointer; transition: background var(--transition); }
 
 .lp-footer { padding: 26px 0 34px; border-top: 1px solid var(--border-light); }
 
+.lp-footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 24px;
+  padding-bottom: 18px;
+}
+
+.lp-footer-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.lp-footer-name {
+  font-weight: 650;
+  letter-spacing: -0.3px;
+}
+
+.lp-footer-desc {
+  color: var(--text-2);
+  font-size: 13.5px;
+  line-height: 1.65;
+  max-width: 46ch;
+}
+
+.lp-footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lp-footer-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.55px;
+  margin-bottom: 2px;
+}
+
+.lp-footer-col a {
+  color: var(--text-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.lp-footer-col a:hover { color: var(--text); text-decoration: underline; }
+
+.lp-footer-bottom {
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.lp-footer-meta {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.lp-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lp-footer-links a { color: var(--text-2); font-size: 13.5px; font-weight: 500; }
+.lp-footer-links a:hover { color: var(--text); text-decoration: underline; }
+
 .lp-footer-inner {
   display: flex;
   align-items: center;
@@ -1520,6 +1593,8 @@ tbody tr { cursor: pointer; transition: background var(--transition); }
   .lp-hero-grid { grid-template-columns: 1fr; }
   .lp-two-col { grid-template-columns: 1fr; }
   .lp-title { font-size: 38px; }
+  .lp-footer-grid { grid-template-columns: 1fr 1fr; }
+  .lp-footer-brand { grid-column: 1 / -1; }
 }
 
 @media (max-width: 560px) {
@@ -1528,6 +1603,8 @@ tbody tr { cursor: pointer; transition: background var(--transition); }
   .lp-metrics { grid-template-columns: 1fr; }
   .lp-mini-grid { grid-template-columns: 1fr; }
   .lp-banner { flex-direction: column; align-items: flex-start; }
+  .lp-footer-grid { grid-template-columns: 1fr; }
+  .lp-footer-bottom { flex-direction: column; align-items: flex-start; }
 }
 
 .auth-main {

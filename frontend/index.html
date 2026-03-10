@@ -204,17 +204,42 @@
     </main>
 
     <footer class="lp-footer">
-      <div class="lp-container lp-footer-inner">
-        <div class="lp-footer-left">
-          <span class="lp-footer-mark">N</span>
-          <span>NexCRM</span>
+      <div class="lp-container lp-footer-grid">
+        <div class="lp-footer-brand">
+          <div class="lp-footer-brand-row">
+            <span class="lp-footer-mark">N</span>
+            <span class="lp-footer-name">NexCRM</span>
+          </div>
+          <p class="lp-footer-desc">A clean, fast CRM for small teams — contacts, deals, tasks, notes, and activity in one place.</p>
         </div>
-        <div class="lp-footer-right">
+
+        <div class="lp-footer-col">
+          <div class="lp-footer-title">Product</div>
+          <a href="#features">Features</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#security">Security</a>
+        </div>
+
+        <div class="lp-footer-col">
+          <div class="lp-footer-title">Account</div>
           <a href="login.html">Sign in</a>
+          <a href="register.html">Get started</a>
+          <a href="dashboard.html">Dashboard</a>
+        </div>
+      </div>
+
+      <div class="lp-container lp-footer-bottom">
+        <div class="lp-footer-meta">© <span id="lpYear"></span> NexCRM. All rights reserved.</div>
+        <div class="lp-footer-links">
+          <a href="index.html">Home</a>
           <a href="register.html">Register</a>
         </div>
       </div>
     </footer>
   </div>
+
+  <script>
+    document.getElementById('lpYear').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>

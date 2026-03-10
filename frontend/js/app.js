@@ -6,9 +6,14 @@
 window.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('access_token');
   if (!token) {
-    window.location.href = '/';
+    window.location.href = 'login.html';
   }
 });
+
+function logout() {
+  localStorage.removeItem('access_token');
+  window.location.href = 'login.html';
+}
 
 // ---- Sidebar Toggle ----
 function toggleSidebar() {

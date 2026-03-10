@@ -32,6 +32,7 @@
       </div>
       <div class="topbar-right">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search anything..." id="globalSearch" onkeyup="globalSearch(this.value)"></div>
+        <button class="btn-secondary" onclick="logout()">Logout</button>
         <div style="display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
           <button id="viewKanban" class="view-btn active" onclick="setView('kanban')" style="padding:7px 12px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;background:var(--text);color:#fff">Board</button>
           <button id="viewList" class="view-btn" onclick="setView('list')" style="padding:7px 12px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;background:transparent;color:var(--text-2)">List</button>
