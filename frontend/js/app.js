@@ -171,9 +171,11 @@ function globalSearch(q) {
   if (!q || q.length < 2) { box.classList.remove('open'); return; }
   searchTimer = setTimeout(async () => {
     const results = [];
-    const contacts = await DB.getContacts();
-    const deals = await DB.getDeals();
-    const tasks = await DB.getTasks();
+    const [contacts, deals, tasks] = await Promise.all([
+      DB.getContacts(),
+      DB.getDeals(),
+      DB.getTasks()
+    ]);
     contacts.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || (c.company||'').toLowerCase().includes(q.toLowerCase())).slice(0,4).forEach(c => {
       results.push({ type: 'Contact', name: c.name, sub: c.company, link: 'contacts.html', id: c.id, icon: 'contact' });
     });

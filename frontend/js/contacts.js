@@ -143,9 +143,11 @@ async function showContact(id) {
   document.getElementById('detailEditBtn').dataset.id = id;
 
   // Get related deals and tasks
-  const deals = await DB.getDeals();
-  const tasks = await DB.getTasks();
-  const notes = await DB.getNotes();
+  const [deals, tasks, notes] = await Promise.all([
+    DB.getDeals(),
+    DB.getTasks(),
+    DB.getNotes()
+  ]);
 
   const relatedDeals = deals.filter(d => d.contactId === id);
   const relatedTasks = tasks.filter(t => t.contactId === id);

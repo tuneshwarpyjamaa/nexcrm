@@ -5,8 +5,10 @@
 let editingTaskId = null;
 
 async function renderTasks() {
-  const all = await DB.getTasks();
-  const contacts = await DB.getContacts();
+  const [all, contacts] = await Promise.all([
+    DB.getTasks(),
+    DB.getContacts()
+  ]);
   const q = document.getElementById('taskFilter').value.toLowerCase();
   const sf = document.getElementById('taskStatusFilter').value;
   const pf = document.getElementById('taskPriorityFilter').value;
