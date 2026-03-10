@@ -21,7 +21,7 @@
     </nav>
     <div class="sidebar-footer"><a href="settings.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg><span>Settings</span></a></div>
   </aside>
-  <main class="main-content">
+  <main class="main-content settings-page">
     <header class="topbar">
       <div class="topbar-left">
         <button class="sidebar-toggle" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
@@ -32,57 +32,154 @@
         <button class="btn-secondary" onclick="logout()">Logout</button>
       </div>
     </header>
-    <div class="page-body">
-      <div style="display:flex;gap:24px">
-        <div style="flex:1;max-width:600px">
+    <div class="page-body" style="padding-bottom: 48px;">
+      <div class="settings-layout">
 
-        <!-- Business Info -->
-        <div class="card" style="margin-bottom:16px" id="profileCard">
-          <div class="card-header"><h2>Profile & Preferences</h2></div>
-          <div class="form-group"><label>Business Name</label><input type="text" id="s_bizName" placeholder="My Company Inc."></div>
-          <div class="form-group"><label>Your Name</label><input type="text" id="s_userName" placeholder="Your name"></div>
-          <div class="form-group"><label>Email</label><input type="email" id="s_email" placeholder="you@company.com"></div>
-          <div class="form-row">
-            <div class="form-group"><label>Currency Symbol</label><input type="text" id="s_currency" placeholder="₹" maxlength="3"></div>
-            <div class="form-group"><label>Fiscal Year Start</label>
-              <select id="s_fyStart"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
+        <!-- ===== LEFT COLUMN ===== -->
+        <div class="settings-left">
+
+          <!-- Profile & Preferences -->
+          <div class="card" id="profileCard">
+            <div class="card-header"><h2>Profile & Preferences</h2></div>
+            <div class="form-group"><label>Business Name</label><input type="text" id="s_bizName" placeholder="My Company Inc."></div>
+            <div class="form-group"><label>Your Name</label><input type="text" id="s_userName" placeholder="Your name"></div>
+            <div class="form-group" style="margin-bottom:12px"><label>Email</label><input type="email" id="s_email" placeholder="you@company.com"></div>
+            <div class="settings-form-row" style="margin-bottom:16px">
+              <div class="form-group"><label>Currency Symbol</label><input type="text" id="s_currency" placeholder="₹" maxlength="3"></div>
+              <div class="form-group"><label>Fiscal Year Start</label>
+                <select id="s_fyStart"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select>
+              </div>
+            </div>
+            <button id="saveBtn" class="btn-primary settings-save-btn" onclick="saveSettings()">Save Settings</button>
+          </div>
+
+          <!-- Your Data -->
+          <div class="card">
+            <div class="card-header"><h2>Your Data</h2></div>
+            <div class="data-stats-grid" id="dataStats"></div>
+            <div class="data-actions-row">
+              <button class="btn-secondary" onclick="exportAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export All Data (JSON)</button>
+              <label class="btn-primary" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8.5 12,3.5 7,8.5"/><line x1="12" y1="3.5" x2="12" y2="15.5"/></svg> Import Backup
+                <input type="file" accept=".json" style="display:none" onchange="importBackup(this)">
+              </label>
             </div>
           </div>
-          <button id="saveBtn" class="btn-primary" onclick="saveSettings()">Save Settings</button>
-        </div>
 
-        <!-- Data Stats -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-header"><h2>Your Data</h2></div>
-          <div id="dataStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px"></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn-secondary" onclick="exportAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export All Data (JSON)</button>
-            <label class="btn-primary" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8.5 12,3.5 7,8.5"/><line x1="12" y1="3.5" x2="12" y2="15.5"/></svg> Import Backup
-              <input type="file" accept=".json" style="display:none" onchange="importBackup(this)">
-            </label>
+          <!-- Danger Zone -->
+          <div class="card" style="border-color:#fecaca">
+            <div class="card-header"><h2 style="color:var(--red)">⚠️ Danger Zone</h2></div>
+            <p style="font-size:13.5px;color:var(--text-2);margin-bottom:14px">These actions are permanent and cannot be undone.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn-danger" onclick="clearData('contacts')">Clear All Contacts</button>
+              <button class="btn-danger" onclick="clearData('deals')">Clear All Deals</button>
+              <button class="btn-danger" onclick="clearData('tasks')">Clear All Tasks</button>
+              <button class="btn-danger" onclick="clearData('all')" style="background:var(--red);color:#fff;border-color:var(--red)">🗑️ Clear Everything</button>
+            </div>
           </div>
+
         </div>
 
-        <!-- Danger Zone -->
-        <div class="card" style="border-color:#fecaca">
-          <div class="card-header"><h2 style="color:var(--red)">⚠️ Danger Zone</h2></div>
-          <p style="font-size:13.5px;color:var(--text-2);margin-bottom:14px">These actions are permanent and cannot be undone.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn-danger" onclick="clearData('contacts')">Clear All Contacts</button>
-            <button class="btn-danger" onclick="clearData('deals')">Clear All Deals</button>
-            <button class="btn-danger" onclick="clearData('tasks')">Clear All Tasks</button>
-            <button class="btn-danger" onclick="clearData('all')" style="background:var(--red);color:#fff;border-color:var(--red)">🗑️ Clear Everything</button>
-          </div>
-        </div>
+        <!-- ===== RIGHT COLUMN ===== -->
+        <div class="settings-right">
 
-      </div>
-        <div style="width:280px">
+          <!-- Account Summary -->
           <div class="card">
             <div class="card-header"><h2>Account Summary</h2></div>
             <div id="summaryContent"></div>
           </div>
+
+          <!-- Quick Links -->
+          <div class="card">
+            <div class="card-header"><h2>Quick Links</h2></div>
+            <a href="dashboard.html" class="quick-link-item">
+              <div class="quick-link-icon" style="background:var(--accent-light)">📊</div>
+              Dashboard
+              <span class="quick-link-arrow">→</span>
+            </a>
+            <a href="contacts.html" class="quick-link-item">
+              <div class="quick-link-icon" style="background:var(--green-light)">👤</div>
+              Contacts
+              <span class="quick-link-arrow">→</span>
+            </a>
+            <a href="deals.html" class="quick-link-item">
+              <div class="quick-link-icon" style="background:var(--yellow-light)">💼</div>
+              Deals Pipeline
+              <span class="quick-link-arrow">→</span>
+            </a>
+            <a href="reports.html" class="quick-link-item">
+              <div class="quick-link-icon" style="background:var(--purple-light)">📈</div>
+              Reports
+              <span class="quick-link-arrow">→</span>
+            </a>
+          </div>
+
+          <!-- Notification Preferences -->
+          <div class="card">
+            <div class="card-header"><h2>Notifications</h2></div>
+            <div class="notif-item">
+              <div>
+                <div class="notif-label">Email Alerts</div>
+                <div class="notif-desc">Get notified about deal changes</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif_email" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notif-item">
+              <div>
+                <div class="notif-label">Task Reminders</div>
+                <div class="notif-desc">Reminders for upcoming due dates</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif_tasks" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="notif-item">
+              <div>
+                <div class="notif-label">Weekly Summary</div>
+                <div class="notif-desc">CRM activity digest every Monday</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="notif_weekly">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Account Danger Zone -->
+          <div class="card danger-zone-right">
+            <div class="card-header"><h2 style="color:var(--red)">Account</h2></div>
+            <div class="danger-action-item">
+              <div class="danger-action-text">
+                <strong>Export Account</strong>
+                Download all your CRM data
+              </div>
+              <button class="btn-danger-sm" onclick="exportAll()">Export</button>
+            </div>
+            <div class="danger-action-item">
+              <div class="danger-action-text">
+                <strong>Delete Account</strong>
+                Permanently remove all data
+              </div>
+              <button class="btn-danger-sm" onclick="deleteAccount()">Delete</button>
+            </div>
+          </div>
+
         </div>
       </div>
+
+      <!-- Page Footer -->
+      <div class="settings-footer">
+        <span class="footer-text">© 2026 NexCRM. All rights reserved.</span>
+        <div class="footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Help Center</a>
+        </div>
+      </div>
+
     </div>
   </main>
 </div>
@@ -98,15 +195,67 @@ async function loadSettings() {
   document.getElementById('s_currency').value = s.currency || '₹';
   document.getElementById('s_fyStart').value = s.fyStart || 'April';
 
+  // Calculate profile completion
+  const fields = [s.bizName, s.userName, s.email, s.currency];
+  const filled = fields.filter(f => f && f.trim()).length;
+  const pct = Math.round((filled / fields.length) * 100);
+
   document.getElementById('summaryContent').innerHTML = `
-    <div style="margin-bottom:8px"><strong>Name:</strong> ${s.userName || '<span style="color:var(--text-3)">—</span>'}</div>
-    <div style="margin-bottom:8px"><strong>Email:</strong> ${s.email || '<span style="color:var(--text-3)">—</span>'}</div>
-    <div style="margin-bottom:8px"><strong>Business:</strong> ${s.bizName || '<span style="color:var(--text-3)">—</span>'}</div>
-    <div style="margin-bottom:8px"><strong>Version:</strong> v1.0</div>
-    <div><strong>Plan:</strong> Free</div>
-    <div style="margin-top:12px"><a href="#" onclick="document.getElementById('profileCard').scrollIntoView({behavior:'smooth'}); document.getElementById('s_bizName').focus();" style="color:var(--accent);font-size:12px;text-decoration:none">Complete your profile →</a></div>
+    <div class="account-summary-item">
+      <div class="summary-icon" style="background:var(--accent-light)">👤</div>
+      <div>
+        <div class="summary-label">Name</div>
+        <div class="summary-val">${s.userName || '<span style="color:var(--text-3)">—</span>'}</div>
+      </div>
+    </div>
+    <div class="account-summary-item">
+      <div class="summary-icon" style="background:var(--green-light)">✉️</div>
+      <div>
+        <div class="summary-label">Email</div>
+        <div class="summary-val">${s.email || '<span style="color:var(--text-3)">—</span>'}</div>
+      </div>
+    </div>
+    <div class="account-summary-item">
+      <div class="summary-icon" style="background:var(--yellow-light)">🏢</div>
+      <div>
+        <div class="summary-label">Business</div>
+        <div class="summary-val">${s.bizName || '<span style="color:var(--text-3)">—</span>'}</div>
+      </div>
+    </div>
+    <div class="account-summary-item">
+      <div class="summary-icon" style="background:var(--purple-light)">💰</div>
+      <div>
+        <div class="summary-label">Currency</div>
+        <div class="summary-val">${s.currency || '₹'}</div>
+      </div>
+    </div>
+
+    <div class="version-info">
+      <span class="version-label">NexCRM Version</span>
+      <span class="version-tag">v1.0.0</span>
+    </div>
+
+    <div class="plan-badge-wrap">
+      <div class="plan-badge-left">
+        <span class="plan-badge-icon">✨</span>
+        <div class="plan-badge-text"><strong>Free Plan</strong><br>Basic features</div>
+      </div>
+      <button class="plan-badge-cta" onclick="toast('Coming soon!','info')">Upgrade</button>
+    </div>
+
+    <div class="profile-completion">
+      <div class="profile-completion-header">
+        <span class="profile-completion-label">Profile Completion</span>
+        <span class="profile-completion-pct">${pct}%</span>
+      </div>
+      <div class="profile-progress-track">
+        <div class="profile-progress-fill" style="width:${pct}%"></div>
+      </div>
+      ${pct < 100 ? `<button class="profile-completion-link" onclick="document.getElementById('profileCard').scrollIntoView({behavior:'smooth'}); document.getElementById('s_bizName').focus();">Complete your profile →</button>` : '<div style="font-size:12px;color:var(--green);margin-top:8px;font-weight:500">✓ Profile complete!</div>'}
+    </div>
   `;
 
+  // Load data stats
   const contacts = await DB.getContacts();
   const deals = await DB.getDeals();
   const tasks = await DB.getTasks();
@@ -115,17 +264,23 @@ async function loadSettings() {
   const c = contacts.length, d = deals.length, t = tasks.length;
   const n = notes.length, e = emails.length;
   document.getElementById('dataStats').innerHTML = [
-    { l: 'Contacts', v: c, icon: '👤', bg: 'rgba(59, 130, 246, 0.1)' }, 
-    { l: 'Deals', v: d, icon: '💼', bg: 'rgba(34, 197, 94, 0.1)' }, 
-    { l: 'Tasks', v: t, icon: '✅', bg: 'rgba(234, 179, 8, 0.1)' }, 
-    { l: 'Notes', v: n, icon: '📝', bg: 'rgba(147, 51, 234, 0.1)' }, 
+    { l: 'Contacts', v: c, icon: '👤', bg: 'rgba(59, 130, 246, 0.1)' },
+    { l: 'Deals', v: d, icon: '💼', bg: 'rgba(34, 197, 94, 0.1)' },
+    { l: 'Tasks', v: t, icon: '✅', bg: 'rgba(234, 179, 8, 0.1)' },
+    { l: 'Notes', v: n, icon: '📝', bg: 'rgba(147, 51, 234, 0.1)' },
     { l: 'Emails', v: e, icon: '✉️', bg: 'rgba(249, 115, 22, 0.1)' },
     { l: 'Storage Used', v: (JSON.stringify(localStorage).length / 1024).toFixed(1) + ' KB', icon: '💾', bg: 'rgba(156, 163, 175, 0.1)' },
-  ].map(m => `<div style="text-align:center;padding:12px;background:${m.bg};border-radius:var(--radius-sm)">
-    <div style="font-size:24px;margin-bottom:4px">${m.icon}</div>
-    <div style="font-size:22px;font-weight:600;font-family:var(--mono);color:var(--accent)">${m.v}</div>
-    <div style="font-size:11.5px;color:var(--text-3);margin-top:2px">${m.l}</div>
+  ].map(m => `<div class="data-stat-tile" style="background:${m.bg}">
+    <div class="data-stat-icon">${m.icon}</div>
+    <div class="data-stat-value">${m.v}</div>
+    <div class="data-stat-label">${m.l}</div>
   </div>`).join('');
+
+  // Load notification prefs
+  const notifs = JSON.parse(localStorage.getItem('crm_notif_prefs') || '{}');
+  if (notifs.email !== undefined) document.getElementById('notif_email').checked = notifs.email;
+  if (notifs.tasks !== undefined) document.getElementById('notif_tasks').checked = notifs.tasks;
+  if (notifs.weekly !== undefined) document.getElementById('notif_weekly').checked = notifs.weekly;
 }
 
 function saveSettings() {
@@ -136,10 +291,18 @@ function saveSettings() {
     currency: document.getElementById('s_currency').value.trim() || '₹',
     fyStart: document.getElementById('s_fyStart').value,
   });
+
+  // Save notification prefs
+  localStorage.setItem('crm_notif_prefs', JSON.stringify({
+    email: document.getElementById('notif_email').checked,
+    tasks: document.getElementById('notif_tasks').checked,
+    weekly: document.getElementById('notif_weekly').checked,
+  }));
+
   toast('Settings saved', 'success');
   const btn = document.getElementById('saveBtn');
   btn.innerHTML = '✓ Saved!';
-  setTimeout(() => btn.innerHTML = 'Save Settings', 2000);
+  setTimeout(() => { btn.innerHTML = 'Save Settings'; loadSettings(); }, 2000);
 }
 
 function exportAll() {
@@ -191,6 +354,21 @@ function clearData(type) {
   if (type === 'all') { DB.saveNotes([]); DB.saveEmails([]); localStorage.removeItem('crm_activity'); }
   toast(`Cleared ${label}`, 'success');
   loadSettings();
+}
+
+function deleteAccount() {
+  if (!confirm('⚠️ Are you sure you want to DELETE your account?\n\nThis will permanently remove ALL your data including contacts, deals, tasks, notes, emails, and settings.\n\nThis action CANNOT be undone.')) return;
+  if (!confirm('This is your final confirmation. Type DELETE to confirm.\n\n(Click OK to proceed with deletion)')) return;
+  DB.saveContacts([]);
+  DB.saveDeals([]);
+  DB.saveTasks([]);
+  DB.saveNotes([]);
+  DB.saveEmails([]);
+  localStorage.removeItem('crm_activity');
+  localStorage.removeItem('crm_settings');
+  localStorage.removeItem('crm_notif_prefs');
+  toast('Account data deleted', 'success');
+  setTimeout(() => { window.location.href = 'login.html'; }, 1500);
 }
 
 loadSettings();
