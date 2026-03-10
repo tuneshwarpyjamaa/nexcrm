@@ -3,67 +3,218 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexCRM — Login</title>
+  <title>NexCRM — Modern CRM for Small Teams</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <div class="logo-mark-large">N</div>
-        <h1>Welcome to NexCRM</h1>
-        <p>Please sign in to continue</p>
-      </div>
-      <form id="loginForm" class="login-form">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required>
+  <div class="lp">
+    <header class="lp-header">
+      <div class="lp-container lp-header-inner">
+        <a class="lp-brand" href="index.html" aria-label="NexCRM">
+          <span class="lp-logo">N</span>
+          <span class="lp-brand-text">NexCRM</span>
+        </a>
+        <nav class="lp-nav" aria-label="Primary">
+          <a class="lp-nav-link" href="#features">Features</a>
+          <a class="lp-nav-link" href="#workflow">Workflow</a>
+          <a class="lp-nav-link" href="#security">Security</a>
+        </nav>
+        <div class="lp-actions">
+          <a class="btn-secondary" href="login.html">Sign in</a>
+          <a class="btn-primary" href="register.html">Get started</a>
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit" class="btn-primary login-btn">Sign In</button>
-      </form>
-      <div id="errorMessage" class="error-message" style="display: none;"></div>
-      <div class="login-footer">
-        <p>Don't have an account? <a href="register.html" class="link-btn">Register here</a></p>
       </div>
-    </div>
+    </header>
+
+    <main>
+      <section class="lp-hero">
+        <div class="lp-container lp-hero-grid">
+          <div class="lp-hero-copy">
+            <div class="lp-pill">
+              <span class="lp-pill-dot"></span>
+              Built for small teams that move fast
+            </div>
+            <h1 class="lp-title">Close more deals with a clean, focused CRM.</h1>
+            <p class="lp-subtitle">Manage contacts, pipeline, tasks, notes, and email activity in one place — without the clutter.</p>
+            <div class="lp-cta">
+              <a class="btn-primary" href="register.html">Create an account</a>
+              <a class="btn-secondary" href="login.html">Sign in</a>
+            </div>
+            <div class="lp-metrics">
+              <div class="lp-metric">
+                <div class="lp-metric-value">1</div>
+                <div class="lp-metric-label">Workspace</div>
+              </div>
+              <div class="lp-metric">
+                <div class="lp-metric-value">5</div>
+                <div class="lp-metric-label">Core modules</div>
+              </div>
+              <div class="lp-metric">
+                <div class="lp-metric-value">Fast</div>
+                <div class="lp-metric-label">Setup</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lp-hero-card">
+            <div class="lp-preview">
+              <div class="lp-preview-top">
+                <div class="lp-window-dots">
+                  <span></span><span></span><span></span>
+                </div>
+                <div class="lp-preview-title">Pipeline snapshot</div>
+              </div>
+              <div class="lp-preview-body">
+                <div class="lp-mini-grid">
+                  <div class="lp-mini">
+                    <div class="lp-mini-k">New leads</div>
+                    <div class="lp-mini-v">24</div>
+                    <div class="lp-mini-d">+6 this week</div>
+                  </div>
+                  <div class="lp-mini">
+                    <div class="lp-mini-k">In progress</div>
+                    <div class="lp-mini-v">12</div>
+                    <div class="lp-mini-d">Next step: follow ups</div>
+                  </div>
+                  <div class="lp-mini">
+                    <div class="lp-mini-k">Forecast</div>
+                    <div class="lp-mini-v">$38k</div>
+                    <div class="lp-mini-d">30-day view</div>
+                  </div>
+                  <div class="lp-mini">
+                    <div class="lp-mini-k">Tasks</div>
+                    <div class="lp-mini-v">7</div>
+                    <div class="lp-mini-d">Due today</div>
+                  </div>
+                </div>
+                <div class="lp-divider"></div>
+                <div class="lp-list">
+                  <div class="lp-list-item">
+                    <div class="lp-list-dot"></div>
+                    <div class="lp-list-text"><strong>Acme Co</strong> — Proposal sent</div>
+                    <div class="lp-list-time">2h</div>
+                  </div>
+                  <div class="lp-list-item">
+                    <div class="lp-list-dot green"></div>
+                    <div class="lp-list-text"><strong>Northwind</strong> — Call scheduled</div>
+                    <div class="lp-list-time">1d</div>
+                  </div>
+                  <div class="lp-list-item">
+                    <div class="lp-list-dot yellow"></div>
+                    <div class="lp-list-text"><strong>Globex</strong> — Waiting on reply</div>
+                    <div class="lp-list-time">3d</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" id="features">
+        <div class="lp-container">
+          <div class="lp-section-head">
+            <h2 class="lp-h2">Everything you need to stay on top of revenue</h2>
+            <p class="lp-p">A small set of powerful modules — designed to work together.</p>
+          </div>
+          <div class="lp-feature-grid">
+            <article class="lp-feature">
+              <h3>Contacts</h3>
+              <p>Organize people and companies with quick access to key details.</p>
+            </article>
+            <article class="lp-feature">
+              <h3>Deals</h3>
+              <p>Track pipeline stages and keep your forecast clear and honest.</p>
+            </article>
+            <article class="lp-feature">
+              <h3>Tasks</h3>
+              <p>Never miss a follow-up. Stay consistent with daily execution.</p>
+            </article>
+            <article class="lp-feature">
+              <h3>Notes</h3>
+              <p>Capture context in the moment so the whole team stays aligned.</p>
+            </article>
+            <article class="lp-feature">
+              <h3>Activity</h3>
+              <p>See what happened and what’s next — without digging through tabs.</p>
+            </article>
+            <article class="lp-feature">
+              <h3>Settings</h3>
+              <p>Keep the system simple. Configure and move on.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" id="workflow">
+        <div class="lp-container">
+          <div class="lp-two-col">
+            <div>
+              <h2 class="lp-h2">A workflow your team will actually adopt</h2>
+              <p class="lp-p">Minimal UI, clear hierarchy, and fast navigation. It feels lightweight — because it is.</p>
+              <div class="lp-checklist">
+                <div class="lp-check"><span class="lp-check-mark">✓</span><span>Fast global navigation across modules</span></div>
+                <div class="lp-check"><span class="lp-check-mark">✓</span><span>Quick Add for creating data without friction</span></div>
+                <div class="lp-check"><span class="lp-check-mark">✓</span><span>Clean tables, cards, and detail panels</span></div>
+              </div>
+              <div class="lp-cta" style="margin-top: 18px;">
+                <a class="btn-primary" href="register.html">Start in minutes</a>
+                <a class="btn-secondary" href="dashboard.html">View dashboard</a>
+              </div>
+            </div>
+            <div class="lp-side-card">
+              <div class="lp-side-card-top">
+                <div class="lp-side-card-title">What you get</div>
+              </div>
+              <div class="lp-side-card-body">
+                <div class="lp-kpi">
+                  <div class="lp-kpi-label">Daily focus</div>
+                  <div class="lp-kpi-value">Tasks + Pipeline</div>
+                </div>
+                <div class="lp-kpi">
+                  <div class="lp-kpi-label">Sales clarity</div>
+                  <div class="lp-kpi-value">Stages + Forecast</div>
+                </div>
+                <div class="lp-kpi">
+                  <div class="lp-kpi-label">Shared context</div>
+                  <div class="lp-kpi-value">Notes + Activity</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section" id="security">
+        <div class="lp-container">
+          <div class="lp-banner">
+            <div>
+              <h2 class="lp-h2" style="margin-bottom: 6px;">Secure sign-in</h2>
+              <p class="lp-p" style="margin: 0;">JWT-based authentication. Your session token is stored in the browser and used for API requests.</p>
+            </div>
+            <div class="lp-banner-actions">
+              <a class="btn-secondary" href="login.html">Sign in</a>
+              <a class="btn-primary" href="register.html">Create account</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lp-footer">
+      <div class="lp-container lp-footer-inner">
+        <div class="lp-footer-left">
+          <span class="lp-footer-mark">N</span>
+          <span>NexCRM</span>
+        </div>
+        <div class="lp-footer-right">
+          <a href="login.html">Sign in</a>
+          <a href="register.html">Register</a>
+        </div>
+      </div>
+    </footer>
   </div>
-
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const errorDiv = document.getElementById('errorMessage');
-
-      try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('access_token', data.access_token);
-          window.location.href = 'dashboard.html';
-        } else {
-          const error = await response.json();
-          errorDiv.textContent = error.detail || 'Login failed';
-          errorDiv.style.display = 'block';
-        }
-      } catch (err) {
-        errorDiv.textContent = 'Network error';
-        errorDiv.style.display = 'block';
-      }
-    });
-  </script>
 </body>
 </html>

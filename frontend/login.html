@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexCRM — Register</title>
+  <title>NexCRM — Login</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -33,14 +33,10 @@
         <div class="login-card auth-card">
           <div class="login-header">
             <div class="logo-mark-large">N</div>
-            <h1>Create your account</h1>
-            <p>Start managing contacts, deals, and tasks in minutes</p>
+            <h1>Welcome back</h1>
+            <p>Sign in to access your workspace</p>
           </div>
-          <form id="registerForm" class="login-form">
-            <div class="form-group">
-              <label for="name">Full Name</label>
-              <input type="text" id="name" name="name" required>
-            </div>
+          <form id="loginForm" class="login-form">
             <div class="form-group">
               <label for="email">Email</label>
               <input type="email" id="email" name="email" required>
@@ -49,11 +45,11 @@
               <label for="password">Password</label>
               <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn-primary login-btn">Create Account</button>
+            <button type="submit" class="btn-primary login-btn">Sign In</button>
           </form>
           <div id="errorMessage" class="error-message" style="display: none;"></div>
           <div class="login-footer">
-            <p>Already have an account? <a href="login.html" class="link-btn">Sign in here</a></p>
+            <p>Don't have an account? <a href="register.html" class="link-btn">Register here</a></p>
           </div>
         </div>
       </div>
@@ -67,45 +63,35 @@
         </div>
         <div class="lp-footer-right">
           <a href="index.html">Home</a>
-          <a href="login.html">Sign in</a>
+          <a href="register.html">Register</a>
         </div>
       </div>
     </footer>
   </div>
 
   <script>
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const errorDiv = document.getElementById('errorMessage');
 
-      if (!name || !email || !password) {
-        errorDiv.textContent = 'Please fill in all fields';
-        errorDiv.style.display = 'block';
-        return;
-      }
-
       try {
-        const response = await fetch('/api/register', {
+        const response = await fetch('/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({ email, password })
         });
 
         if (response.ok) {
-          errorDiv.textContent = 'Account created successfully! Please sign in.';
-          errorDiv.style.display = 'block';
-          errorDiv.style.color = 'green';
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 2000);
+          const data = await response.json();
+          localStorage.setItem('access_token', data.access_token);
+          window.location.href = 'dashboard.html';
         } else {
           const error = await response.json();
-          errorDiv.textContent = error.detail || 'Registration failed';
+          errorDiv.textContent = error.detail || 'Login failed';
           errorDiv.style.display = 'block';
         }
       } catch (err) {
