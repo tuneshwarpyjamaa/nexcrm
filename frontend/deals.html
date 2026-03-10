@@ -33,16 +33,16 @@
       <div class="topbar-right">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search anything..." id="globalSearch" onkeyup="globalSearch(this.value)"></div>
         <button class="btn-secondary" onclick="logout()">Logout</button>
-        <div style="display:flex;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
-          <button id="viewKanban" class="view-btn active" onclick="setView('kanban')" style="padding:7px 12px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;background:var(--text);color:#fff">Board</button>
-          <button id="viewList" class="view-btn" onclick="setView('list')" style="padding:7px 12px;border:none;cursor:pointer;font-family:var(--font);font-size:13px;background:transparent;color:var(--text-2)">List</button>
+        <div class="view-toggle">
+          <button id="viewKanban" class="view-btn active" onclick="setView('kanban')">Board</button>
+          <button id="viewList" class="view-btn" onclick="setView('list')">List</button>
         </div>
         <button class="btn-primary" onclick="openAddDeal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Deal</button>
       </div>
     </header>
     <div class="page-body">
       <!-- Pipeline summary bar -->
-      <div id="pipelineSummary" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap"></div>
+      <div id="pipelineSummary" class="deals-summary"></div>
       <!-- Kanban View -->
       <div id="kanbanView" class="kanban-board"></div>
       <!-- List View -->
@@ -50,7 +50,7 @@
         <div class="page-toolbar">
           <div class="toolbar-left">
             <input type="text" class="filter-input" placeholder="Filter deals..." id="dealFilter" oninput="renderDeals()">
-            <select id="stageFilter" onchange="renderDeals()" style="width:130px;padding:7px 30px 7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13.5px">
+            <select id="stageFilter" class="stage-filter" onchange="renderDeals()">
               <option value="">All Stages</option>
               <option>Lead</option><option>Meeting</option><option>Proposal</option><option>Negotiation</option><option>Won</option><option>Lost</option>
             </select>
@@ -60,7 +60,7 @@
           </div>
         </div>
         <div class="table-wrap">
-          <table>
+          <table class="deals-table">
             <thead><tr><th>Deal</th><th>Company</th><th>Value</th><th>Stage</th><th>Probability</th><th>Close Date</th><th>Contact</th><th></th></tr></thead>
             <tbody id="dealsTable"></tbody>
           </table>

@@ -4,3 +4,6 @@ asyncpg
 python-dotenv
 PyJWT
 passlib[bcrypt]
+authlib
+httpx
+google-auth

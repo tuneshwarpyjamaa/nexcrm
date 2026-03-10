@@ -10,10 +10,8 @@ function setView(v) {
   currentView = v;
   document.getElementById('kanbanView').style.display = v === 'kanban' ? 'flex' : 'none';
   document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
-  document.getElementById('viewKanban').style.background = v === 'kanban' ? 'var(--text)' : 'transparent';
-  document.getElementById('viewKanban').style.color = v === 'kanban' ? '#fff' : 'var(--text-2)';
-  document.getElementById('viewList').style.background = v === 'list' ? 'var(--text)' : 'transparent';
-  document.getElementById('viewList').style.color = v === 'list' ? '#fff' : 'var(--text-2)';
+  document.getElementById('viewKanban').classList.toggle('active', v === 'kanban');
+  document.getElementById('viewList').classList.toggle('active', v === 'list');
   renderDeals();
 }
 
@@ -35,9 +33,9 @@ async function renderDeals() {
     { label: 'Active Deals', value: active.length, color: 'var(--yellow)' },
     { label: 'Win Rate', value: deals.length > 0 ? Math.round((won.length / Math.max(won.length + deals.filter(d=>d.stage==='Lost').length, 1)) * 100) + '%' : '—', color: 'var(--text)' },
   ].map(m => `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow);min-width:120px">
-      <div style="font-size:11.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;font-weight:500;margin-bottom:4px">${m.label}</div>
-      <div style="font-size:20px;font-weight:600;color:${m.color};letter-spacing:-0.5px;font-family:var(--mono)">${m.value}</div>
+    <div class="summary-card">
+      <div class="summary-label">${m.label}</div>
+      <div class="summary-value" style="color:${m.color}">${m.value}</div>
     </div>
   `).join('');
 
@@ -183,22 +181,20 @@ async function renderList(deals, contacts) {
     const c = contacts.find(c => c.id === d.contactId);
     return `
       <tr onclick="showDeal('${d.id}')">
-        <td><div style="font-weight:500">${d.title}</div></td>
-        <td>${d.company || '—'}</td>
-        <td style="font-family:var(--mono);font-weight:600;color:var(--green)">${formatMoney(d.value)}</td>
+        <td class="cell-title"><div class="deal-title">${d.title}</div></td>
+        <td class="cell-company">${d.company || '—'}</td>
+        <td><span class="money">${formatMoney(d.value)}</span></td>
         <td>${stageTag(d.stage)}</td>
         <td>
-          <div style="display:flex;align-items:center;gap:6px">
-            <div style="width:60px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden">
-              <div style="width:${d.probability||0}%;height:100%;background:var(--accent);border-radius:3px"></div>
-            </div>
-            <span style="font-size:12px;color:var(--text-3)">${d.probability||0}%</span>
+          <div class="prob-wrap">
+            <div class="prob-track"><div class="prob-fill" style="width:${d.probability||0}%"></div></div>
+            <span class="muted">${d.probability||0}%</span>
           </div>
         </td>
-        <td style="font-size:12.5px;color:var(--text-3)">${formatDate(d.closeDate)}</td>
-        <td>${c ? `<div style="display:flex;align-items:center;gap:6px">${avatarHTML(c.name,22)}<span style="font-size:13px">${c.name}</span></div>` : '—'}</td>
-        <td onclick="event.stopPropagation()">
-          <div style="display:flex;gap:4px">
+        <td><span class="muted">${formatDate(d.closeDate)}</span></td>
+        <td>${c ? `<div class="contact-mini">${avatarHTML(c.name,22)}<span class="contact-mini-name">${c.name}</span></div>` : '—'}</td>
+        <td class="cell-actions" onclick="event.stopPropagation()">
+          <div class="row-actions">
             <button class="btn-icon" onclick="openEditDeal('${d.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
             <button class="btn-icon" onclick="deleteDeal('${d.id}')" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2 2 0 0 1-2,2H8a2 2 0 0 1-2-2L5,6"/></svg></button>
           </div>

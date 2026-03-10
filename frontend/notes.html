@@ -40,7 +40,7 @@
         </div>
         <div class="toolbar-right"><span id="noteCount" style="font-size:13px;color:var(--text-3)"></span></div>
       </div>
-      <div id="notesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+      <div id="notesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px"></div>
     </div>
   </main>
 </div>
@@ -70,17 +70,18 @@
 <script>
 let editingNoteId = null;
 
-function renderNotes() {
+async function renderNotes() {
   const q = document.getElementById('noteFilter').value.toLowerCase();
-  let notes = DB.getNotes();
+  let notes = await DB.getNotes();
   if (q) notes = notes.filter(n => n.title?.toLowerCase().includes(q) || n.body?.toLowerCase().includes(q));
   document.getElementById('noteCount').textContent = `${notes.length} note${notes.length !== 1 ? 's' : ''}`;
   if (notes.length === 0) {
     document.getElementById('notesGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-3)">No notes yet. <a href="#" onclick="openAddNote()" style="color:var(--accent)">Add your first note →</a></div>`;
     return;
   }
+  const contacts = await DB.getContacts();
   document.getElementById('notesGrid').innerHTML = notes.map(n => {
-    const c = n.contactId ? DB.getContact(n.contactId) : null;
+    const c = contacts.find(c => c.id === n.contactId);
     return `
       <div class="note-card" onclick="openEditNote('${n.id}')">
         <div class="note-header">
@@ -97,51 +98,52 @@ function renderNotes() {
   }).join('');
 }
 
-function openAddNote() {
+async function openAddNote() {
   editingNoteId = null;
   document.getElementById('noteModalTitle').textContent = 'Add Note';
   ['title','body'].forEach(f => document.getElementById('n_'+f).value = '');
-  const contacts = DB.getContacts();
+  const contacts = await DB.getContacts();
   document.getElementById('n_contact').innerHTML = '<option value="">No contact linked</option>' + contacts.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   openModal('noteModal');
   setTimeout(() => document.getElementById('n_title').focus(), 100);
 }
 
-function openEditNote(id) {
-  const n = DB.getNotes().find(x => x.id === id);
+async function openEditNote(id) {
+  const notes = await DB.getNotes();
+  const n = notes.find(x => x.id === id);
   if (!n) return;
   editingNoteId = id;
   document.getElementById('noteModalTitle').textContent = 'Edit Note';
   document.getElementById('n_title').value = n.title || '';
   document.getElementById('n_body').value = n.body || '';
-  const contacts = DB.getContacts();
+  const contacts = await DB.getContacts();
   document.getElementById('n_contact').innerHTML = '<option value="">No contact linked</option>' + contacts.map(c=>`<option value="${c.id}" ${c.id === n.contactId ? 'selected':''}>${c.name}</option>`).join('');
   openModal('noteModal');
 }
 
-function saveNote() {
+async function saveNote() {
   const title = document.getElementById('n_title').value.trim();
   const body = document.getElementById('n_body').value.trim();
   if (!title || !body) { toast('Title and body required', 'error'); return; }
   const cId = document.getElementById('n_contact').value || null;
-  const c = cId ? DB.getContact(cId) : null;
+  const c = cId ? await DB.getContact(cId) : null;
   const data = { title, body, contactId: cId, contactName: c ? c.name : '' };
   if (editingNoteId) {
-    DB.updateNote(editingNoteId, data);
+    await DB.updateNote(editingNoteId, data);
     toast('Note updated', 'success');
   } else {
-    DB.addNote(data);
+    await DB.addNote(data);
     toast('Note saved', 'success');
   }
   closeModal();
-  renderNotes();
+  await renderNotes();
 }
 
-function deleteNote(id) {
+async function deleteNote(id) {
   if (!confirm('Delete this note?')) return;
-  DB.deleteNote(id);
+  await DB.deleteNote(id);
   toast('Note deleted');
-  renderNotes();
+  await renderNotes();
 }
 
 if (getParam('new') === '1') setTimeout(openAddNote, 100);

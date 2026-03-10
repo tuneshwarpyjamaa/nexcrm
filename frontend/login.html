@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="lp">
@@ -47,6 +48,8 @@
             </div>
             <button type="submit" class="btn-primary login-btn">Sign In</button>
           </form>
+          <div class="divider">or</div>
+          <div id="google-signin-btn"></div>
           <div id="errorMessage" class="error-message" style="display: none;"></div>
           <div class="login-footer">
             <p>Don't have an account? <a href="register.html" class="link-btn">Register here</a></p>
@@ -99,6 +102,45 @@
         errorDiv.style.display = 'block';
       }
     });
+
+    function handleCredentialResponse(response) {
+      const credential = response.credential;
+      fetch('/api/auth/google/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ credential })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.access_token) {
+          localStorage.setItem('access_token', data.access_token);
+          window.location.href = 'dashboard.html';
+        } else {
+          throw new Error(data.detail || 'Sign-in failed');
+        }
+      })
+      .catch(err => {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = err.message || 'Google sign-in failed';
+        errorDiv.style.display = 'block';
+      });
+    }
+
+    fetch('/api/auth/google/client_id')
+    .then(response => response.json())
+    .then(data => {
+      google.accounts.id.initialize({
+        client_id: data.client_id,
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-btn'),
+        { theme: 'outline', size: 'large' }
+      );
+    })
+    .catch(err => console.error('Failed to load Google Client ID', err));
   </script>
 </body>
 </html>

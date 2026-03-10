@@ -34,7 +34,7 @@
       </div>
     </header>
     <div class="page-body">
-      <div id="taskStats" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap"></div>
+      <div id="taskStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px"></div>
       <div class="page-toolbar">
         <div class="toolbar-left">
           <input type="text" class="filter-input" placeholder="Filter tasks..." id="taskFilter" oninput="renderTasks()">

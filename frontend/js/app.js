@@ -138,7 +138,17 @@ const STAGE_COLORS = {
 
 function stageTag(stage) {
   const color = STAGE_COLORS[stage] || '#6b7280';
-  return `<span style="background:${color}18;color:${color};padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500">${stage}</span>`;
+  const bg = hexToRgba(color, 0.10);
+  return `<span style="background:${bg};color:${color};padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500">${stage}</span>`;
+}
+
+function hexToRgba(hex, alpha) {
+  const h = (hex || '').replace('#', '');
+  if (h.length !== 6) return `rgba(107,114,128,${alpha})`;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 // ---- Status Tags ----
