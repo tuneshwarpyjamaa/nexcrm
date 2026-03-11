@@ -20,7 +20,7 @@
 - [x] Contact management — full CRUD, tags, status, LinkedIn, company, search & filter
 - [x] Activity tracking — recent activity feed on dashboard
 - [x] Settings & preferences — business name, user name, email, currency symbol, fiscal year start
-- [ ] Email tracking/sync — open tracking, inbox sync, read receipts
+- [x] Email tracking/sync — open tracking, inbox sync, read receipts
 - [ ] Email sequences — automated follow-up email chains
 - [ ] Task automation — auto-assign, auto-reminders, recurring tasks
 - [ ] File attachments — attach files to contacts, deals, notes, emails

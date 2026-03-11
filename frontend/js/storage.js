@@ -192,6 +192,20 @@ const DB = {
       headers: getAuthHeaders()
     });
   },
+  updateEmail: async (id, data) => {
+    const response = await fetch(`/api/emails/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  },
+  getEmailStats: async () => {
+    const response = await fetch('/api/emails/stats', {
+      headers: getAuthHeaders()
+    });
+    return await response.json();
+  },
 
   // --- Activity Log ---
   getActivity: async () => {

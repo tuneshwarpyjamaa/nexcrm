@@ -71,6 +71,14 @@ class Email(Base):
     subject = Column(String)
     body = Column(Text)
     sentAt = Column(DateTime, default=datetime.datetime.now)
+    trackingId = Column(String, nullable=True)
+    openCount = Column(Integer, default=0)
+    lastOpenedAt = Column(DateTime, nullable=True)
+    isRead = Column(Boolean, default=False)
+    readAt = Column(DateTime, nullable=True)
+    direction = Column(String, default='sent')
+    contactId = Column(String, nullable=True)
+    type = Column(String, nullable=True)
 
 class Activity(Base):
     __tablename__ = "activity"

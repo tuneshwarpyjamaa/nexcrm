@@ -120,25 +120,26 @@ async def main():
     print("[OK] 10 notes inserted")
 
     # ── Emails ──────────────────────────────────────────────────────────
+    import uuid
     emails = [
-        ("e_001", "priya.sharma@infosys.com", "Cloud Migration Proposal - NexCRM", "Hi Priya,\n\nPlease find attached the cloud migration proposal as discussed. Looking forward to your feedback.\n\nBest regards"),
-        ("e_002", "rahul.mehta@tcs.com", "Revised Enterprise License Pricing", "Hi Rahul,\n\nAs promised, here are the revised pricing tiers with the volume discounts. Let me know if you have questions.\n\nRegards"),
-        ("e_003", "ananya.r@wipro.com", "AI Integration Demo Invite", "Hi Ananya,\n\nGreat meeting you at TechSummit! Would love to schedule a demo of our AI integration capabilities. How does next Thursday work?\n\nBest"),
-        ("e_004", "vikram.desai@zoho.com", "CRM Migration Timeline", "Hi Vikram,\n\nHere's the preliminary migration timeline we discussed. Phase 1 covers data migration and should take about 4 weeks.\n\nCheers"),
-        ("e_005", "meera.nair@freshworks.com", "API Integration Specifications", "Hi Meera,\n\nAttached are the API specs for the bidirectional sync. Let's schedule a technical deep-dive with your engineering team.\n\nBest"),
-        ("e_006", "arjun.patel@reliance.com", "POS System - Offline Mode Documentation", "Hi Arjun,\n\nHere's the documentation on our offline-first architecture. It addresses the tier-2/3 city connectivity concerns you raised.\n\nRegards"),
-        ("e_007", "kavitha.i@hcltech.com", "RFP Response - Analytics Platform", "Hi Kavitha,\n\nPlease find our formal RFP response attached. We've addressed all requirements including SOC2 compliance details.\n\nBest regards"),
-        ("e_008", "sanjay.gupta@razorpay.com", "Onboarding Complete - Next Steps", "Hi Sanjay,\n\nGreat working with your team today. Development sprint starts Monday. First milestone: reconciliation dashboard by March 25.\n\nCheers"),
-        ("e_009", "deepika.j@swiggy.com", "Logistics Optimization - Case Studies", "Hi Deepika,\n\nAttached are two relevant case studies from similar high-volume logistics companies. Happy to discuss further.\n\nBest"),
-        ("e_010", "rohan.kapoor@byju.com", "LMS Integration Architecture Proposal", "Hi Rohan,\n\nHere's the proposed architecture for integrating our analytics into your LMS platform. Minimal changes needed on your end.\n\nRegards"),
+        ("e_001", "priya.sharma@infosys.com", "Cloud Migration Proposal - NexCRM", "Hi Priya,\n\nPlease find attached the cloud migration proposal as discussed. Looking forward to your feedback.\n\nBest regards", str(uuid.uuid4()), 3, now - timedelta(hours=5), False, None, "sent", "c_001", "Proposal"),
+        ("e_002", "rahul.mehta@tcs.com", "Revised Enterprise License Pricing", "Hi Rahul,\n\nAs promised, here are the revised pricing tiers with the volume discounts. Let me know if you have questions.\n\nRegards", str(uuid.uuid4()), 1, now - timedelta(hours=2), False, None, "sent", "c_002", "Follow-up"),
+        ("e_003", "ananya.r@wipro.com", "AI Integration Demo Invite", "Hi Ananya,\n\nGreat meeting you at TechSummit! Would love to schedule a demo of our AI integration capabilities. How does next Thursday work?\n\nBest", str(uuid.uuid4()), 0, None, False, None, "sent", "c_003", "Meeting Request"),
+        ("e_004", "vikram.desai@zoho.com", "CRM Migration Timeline", "Hi Vikram,\n\nHere's the preliminary migration timeline we discussed. Phase 1 covers data migration and should take about 4 weeks.\n\nCheers", str(uuid.uuid4()), 5, now - timedelta(minutes=30), False, None, "sent", "c_004", "Follow-up"),
+        ("e_005", "meera.nair@freshworks.com", "API Integration Specifications", "Hi Meera,\n\nAttached are the API specs for the bidirectional sync. Let's schedule a technical deep-dive with your engineering team.\n\nBest", str(uuid.uuid4()), 2, now - timedelta(hours=1), False, None, "sent", "c_005", "Proposal"),
+        ("e_006", "me@nexcrm.com", "Re: POS System - Offline Mode", "Hi,\n\nThank you for the documentation on offline-first architecture. We've reviewed it and it looks great for our tier-2/3 stores.\n\nCan we schedule a call this week to discuss implementation?\n\nRegards,\nArjun Patel", None, 0, None, True, now - timedelta(hours=3), "received", "c_006", "Follow-up"),
+        ("e_007", "kavitha.i@hcltech.com", "RFP Response - Analytics Platform", "Hi Kavitha,\n\nPlease find our formal RFP response attached. We've addressed all requirements including SOC2 compliance details.\n\nBest regards", str(uuid.uuid4()), 4, now - timedelta(hours=1, minutes=20), False, None, "sent", "c_007", "Proposal"),
+        ("e_008", "me@nexcrm.com", "Onboarding Feedback - Razorpay", "Hi Team,\n\nThe onboarding went smoothly. Just a couple of suggestions:\n1. Dashboard load time could be faster\n2. Would love bulk import for historical data\n\nCheers,\nSanjay", None, 0, None, False, None, "received", "c_008", "Check-in"),
+        ("e_009", "deepika.j@swiggy.com", "Logistics Optimization - Case Studies", "Hi Deepika,\n\nAttached are two relevant case studies from similar high-volume logistics companies. Happy to discuss further.\n\nBest", str(uuid.uuid4()), 0, None, False, None, "sent", "c_009", "Cold Outreach"),
+        ("e_010", "me@nexcrm.com", "LMS Integration Questions", "Hello,\n\nWe have a few technical questions about the proposed architecture:\n- How does real-time sync work?\n- What is the expected latency?\n- Can we customize the analytics dashboard?\n\nRegards,\nRohan Kapoor", None, 0, None, False, None, "received", "c_010", "Follow-up"),
     ]
     for e in emails:
         sent = now - timedelta(days=12 - emails.index(e), hours=emails.index(e) * 2)
         await conn.execute(
-            'INSERT INTO emails (id, to_email, subject, body, "sentAt") VALUES ($1,$2,$3,$4,$5)',
+            'INSERT INTO emails (id, to_email, subject, body, "trackingId", "openCount", "lastOpenedAt", "isRead", "readAt", direction, "contactId", type, "sentAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)',
             *e, sent,
         )
-    print("[OK] 10 emails inserted")
+    print("[OK] 10 emails inserted (with tracking data)")
 
     # ── Activity ────────────────────────────────────────────────────────
     activities = [

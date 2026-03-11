@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NexCRM — Emails</title>
+  <title>NexCRM — Email Tracking</title>
+  <meta name="description" content="Track email opens, read receipts, and sync your inbox with NexCRM's email tracking dashboard.">
   <link rel="stylesheet" href="css/main.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
@@ -32,18 +33,61 @@
     <header class="topbar">
       <div class="topbar-left">
         <button class="sidebar-toggle" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-        <h1 class="page-title">Email Log</h1>
+        <h1 class="page-title">Email Tracking</h1>
       </div>
       <div class="topbar-right">
         <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search..." id="globalSearch" onkeyup="globalSearch(this.value)"></div>
-
-        <button class="btn-primary" onclick="openLogEmail()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Log Email</button>
+        <button class="btn-secondary" onclick="simulateInboxSync()" id="syncBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Sync Inbox</button>
+        <button class="btn-primary" onclick="openLogEmail()" id="composeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Compose</button>
       </div>
     </header>
     <div class="page-body">
-      <div style="background:var(--accent-light);border:1px solid #bfdbfe;border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;font-size:13.5px;color:var(--accent)">
-        💡 <strong>Email Log</strong> — Track all your email communications. Log emails you've sent, and use the compose button to open your email client with a pre-filled draft.
+
+      <!-- Email Tracking Stats -->
+      <div class="stats-grid" id="emailStatsGrid" style="margin-bottom:20px">
+        <div class="stat-card" id="statTotal">
+          <div class="stat-label">Total Emails</div>
+          <div class="stat-value" id="statTotalVal">—</div>
+          <div class="stat-delta" id="statTotalDelta">Loading...</div>
+        </div>
+        <div class="stat-card" id="statSent">
+          <div class="stat-label">Sent</div>
+          <div class="stat-value" id="statSentVal">—</div>
+          <div class="stat-delta" id="statSentDelta"><span class="email-tracking-icon email-tracking-icon--sent">↑</span> outgoing</div>
+        </div>
+        <div class="stat-card" id="statReceived">
+          <div class="stat-label">Received</div>
+          <div class="stat-value" id="statReceivedVal">—</div>
+          <div class="stat-delta" id="statReceivedDelta"><span class="email-tracking-icon email-tracking-icon--received">↓</span> incoming</div>
+        </div>
+        <div class="stat-card" id="statOpened">
+          <div class="stat-label">Open Rate</div>
+          <div class="stat-value" id="statOpenedVal">—</div>
+          <div class="stat-delta" id="statOpenedDelta">of sent emails opened</div>
+        </div>
+        <div class="stat-card" id="statUnread">
+          <div class="stat-label">Unread</div>
+          <div class="stat-value" id="statUnreadVal">—</div>
+          <div class="stat-delta" id="statUnreadDelta">need attention</div>
+        </div>
       </div>
+
+      <!-- Direction Tabs & Toolbar -->
+      <div class="email-tabs" id="emailTabs">
+        <button class="email-tab active" data-dir="all" onclick="switchTab('all')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          All Emails <span class="email-tab-count" id="tabCountAll">0</span>
+        </button>
+        <button class="email-tab" data-dir="sent" onclick="switchTab('sent')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+          Sent <span class="email-tab-count" id="tabCountSent">0</span>
+        </button>
+        <button class="email-tab" data-dir="received" onclick="switchTab('received')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 16,12 14,15 10,15 8,12 2,12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          Inbox <span class="email-tab-count" id="tabCountReceived">0</span>
+        </button>
+      </div>
+
       <div class="page-toolbar">
         <div class="toolbar-left">
           <input type="text" class="filter-input" placeholder="Filter emails..." id="emailFilter" oninput="renderEmails()">
@@ -52,9 +96,20 @@
           <span id="emailCount" style="font-size:13px;color:var(--text-3)"></span>
         </div>
       </div>
+
+      <!-- Email Table -->
       <div class="table-wrap">
         <table>
-          <thead><tr><th>To</th><th>Subject</th><th>Contact</th><th>Type</th><th>Sent</th><th></th></tr></thead>
+          <thead><tr>
+            <th></th>
+            <th>To / From</th>
+            <th>Subject</th>
+            <th>Contact</th>
+            <th>Type</th>
+            <th>Tracking</th>
+            <th>Date</th>
+            <th></th>
+          </tr></thead>
           <tbody id="emailsTable"></tbody>
         </table>
       </div>
@@ -62,11 +117,11 @@
   </main>
 </div>
 
-<!-- Log Email Modal -->
+<!-- Log/Compose Email Modal -->
 <div class="modal-overlay" id="emailModal" onclick="closeModal(event)">
   <div class="modal modal-wide">
     <div class="modal-header">
-      <h3>Log / Send Email</h3>
+      <h3 id="emailModalTitle">Compose Email</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="form-group"><label>Contact</label>
@@ -77,16 +132,29 @@
     <div class="form-group"><label>Type</label>
       <select id="e_type"><option>Follow-up</option><option>Proposal</option><option>Cold Outreach</option><option>Check-in</option><option>Thank You</option><option>Meeting Request</option><option>Other</option></select>
     </div>
+    <div class="form-group"><label>Direction</label>
+      <select id="e_direction">
+        <option value="sent">Sent (Outgoing)</option>
+        <option value="received">Received (Incoming)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="email-toggle-label">
+        <input type="checkbox" id="e_tracking" checked>
+        <span class="email-toggle-text">Enable open tracking</span>
+        <span class="email-toggle-hint">Embeds a tracking pixel to detect when the recipient opens the email</span>
+      </label>
+    </div>
     <div class="form-group"><label>Body / Notes</label><textarea id="e_body" placeholder="Email content or notes about what was discussed..." style="min-height:120px"></textarea></div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeModal()">Cancel</button>
       <button class="btn-secondary" onclick="openInMailClient()">📧 Open in Mail App</button>
-      <button class="btn-primary" onclick="logEmail()">Log Email</button>
+      <button class="btn-primary" onclick="logEmail()">Send & Track</button>
     </div>
   </div>
 </div>
 
-<!-- Email Detail -->
+<!-- Email Detail Panel -->
 <div class="detail-overlay" id="detailOverlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="emailDetail">
   <div class="detail-header">
@@ -100,23 +168,115 @@
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>
 <script>
+let currentTab = 'all';
+
+async function loadStats() {
+  try {
+    const stats = await DB.getEmailStats();
+    document.getElementById('statTotalVal').textContent = stats.total || 0;
+    document.getElementById('statTotalDelta').textContent = `${stats.totalOpens || 0} total opens tracked`;
+    document.getElementById('statSentVal').textContent = stats.sent || 0;
+    document.getElementById('statReceivedVal').textContent = stats.received || 0;
+    document.getElementById('statOpenedVal').textContent = (stats.openRate || 0) + '%';
+    document.getElementById('statOpenedDelta').textContent = `${stats.opened || 0} of ${stats.sent || 0} sent emails opened`;
+    document.getElementById('statUnreadVal').textContent = stats.unread || 0;
+
+    const unreadEl = document.getElementById('statUnreadDelta');
+    if (stats.unread > 0) {
+      unreadEl.textContent = 'need attention';
+      unreadEl.style.color = 'var(--red)';
+    } else {
+      unreadEl.textContent = 'all caught up ✓';
+      unreadEl.style.color = 'var(--green)';
+    }
+  } catch (e) {
+    console.error('Stats load error:', e);
+  }
+}
+
+function switchTab(dir) {
+  currentTab = dir;
+  document.querySelectorAll('.email-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.dir === dir);
+  });
+  renderEmails();
+}
+
 async function renderEmails() {
   const q = document.getElementById('emailFilter').value.toLowerCase();
   let emails = await DB.getEmails();
+
+  // Tab counts
+  document.getElementById('tabCountAll').textContent = emails.length;
+  document.getElementById('tabCountSent').textContent = emails.filter(e => (e.direction || 'sent') === 'sent').length;
+  document.getElementById('tabCountReceived').textContent = emails.filter(e => e.direction === 'received').length;
+
+  // Filter by tab
+  if (currentTab !== 'all') {
+    emails = emails.filter(e => (e.direction || 'sent') === currentTab);
+  }
+
+  // Filter by search
   if (q) emails = emails.filter(e => e.subject?.toLowerCase().includes(q) || e.to?.toLowerCase().includes(q));
+
   document.getElementById('emailCount').textContent = `${emails.length} email${emails.length !== 1 ? 's' : ''}`;
+
   if (emails.length === 0) {
-    document.getElementById('emailsTable').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-3)">No emails logged yet. <a href="#" onclick="openLogEmail()" style="color:var(--accent)">Log your first email →</a></td></tr>`;
+    document.getElementById('emailsTable').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-3)">No emails found. <a href="#" onclick="openLogEmail()" style="color:var(--accent)">Compose your first email →</a></td></tr>`;
     return;
   }
+
   const contacts = await DB.getContacts();
+
   document.getElementById('emailsTable').innerHTML = emails.map(e => {
     const c = contacts.find(c => c.id === e.contactId);
-    return `<tr onclick="showEmail('${e.id}')">
+    const isSent = (e.direction || 'sent') === 'sent';
+
+    // Direction indicator
+    const dirIcon = isSent
+      ? `<span class="email-dir-badge email-dir-badge--sent" title="Sent">↑</span>`
+      : `<span class="email-dir-badge email-dir-badge--received" title="Received">↓</span>`;
+
+    // Tracking status
+    let trackingHTML = '';
+    if (isSent) {
+      if (e.openCount > 0) {
+        trackingHTML = `<span class="email-track-badge email-track-badge--opened" title="Opened ${e.openCount} time${e.openCount > 1 ? 's' : ''}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          ${e.openCount}
+        </span>`;
+      } else if (e.trackingId) {
+        trackingHTML = `<span class="email-track-badge email-track-badge--pending" title="Tracking active — not yet opened">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          Pending
+        </span>`;
+      } else {
+        trackingHTML = `<span class="email-track-badge email-track-badge--notrack" title="No tracking">—</span>`;
+      }
+    } else {
+      // Received email: read receipt
+      if (e.isRead) {
+        trackingHTML = `<span class="email-track-badge email-track-badge--read" title="Read">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><polyline points="20,6 9,17 4,12"/></svg>
+          Read
+        </span>`;
+      } else {
+        trackingHTML = `<span class="email-track-badge email-track-badge--unread" title="Unread">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+          New
+        </span>`;
+      }
+    }
+
+    const unreadClass = (!isSent && !e.isRead) ? 'email-row-unread' : '';
+
+    return `<tr onclick="showEmail('${e.id}')" class="${unreadClass}">
+      <td style="width:32px;padding-right:0">${dirIcon}</td>
       <td><a href="mailto:${e.to || ''}" onclick="event.stopPropagation()" style="color:var(--accent)">${e.to || '—'}</a></td>
       <td style="font-weight:500">${e.subject || '—'}</td>
       <td>${c ? `<div style="display:flex;align-items:center;gap:6px">${avatarHTML(c.name||'?',22)}<span style="font-size:13px">${c.name||'—'}</span></div>` : '—'}</td>
       <td><span class="tag tag-blue">${e.type||'Email'}</span></td>
+      <td>${trackingHTML}</td>
       <td style="font-size:12.5px;color:var(--text-3)">${relativeTime(e.sentAt)}</td>
       <td><button class="btn-icon" onclick="event.stopPropagation();deleteEmail('${e.id}')" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14a2 2 0 0 1-2,2H8a2 2 0 0 1-2-2L5,6"/></svg></button></td>
     </tr>`;
@@ -128,6 +288,9 @@ async function openLogEmail() {
   document.getElementById('e_contact').innerHTML = '<option value="">Choose contact...</option>' + contacts.map(c=>`<option value="${c.id}" data-email="${c.email||''}">${c.name}</option>`).join('');
   ['to','subject','body'].forEach(f => document.getElementById('e_'+f).value = '');
   document.getElementById('e_type').value = 'Follow-up';
+  document.getElementById('e_direction').value = 'sent';
+  document.getElementById('e_tracking').checked = true;
+  document.getElementById('emailModalTitle').textContent = 'Compose Email';
   const cId = getParam('contact');
   if (cId) {
     document.getElementById('e_contact').value = cId;
@@ -146,10 +309,22 @@ async function logEmail() {
   const to = document.getElementById('e_to').value.trim();
   const subject = document.getElementById('e_subject').value.trim();
   if (!to || !subject) { toast('To and Subject are required', 'error'); return; }
-  await DB.addEmail({ to, subject, body: document.getElementById('e_body').value.trim(), type: document.getElementById('e_type').value, contactId: document.getElementById('e_contact').value || null });
-  toast('Email logged', 'success');
+
+  const emailData = {
+    to,
+    subject,
+    body: document.getElementById('e_body').value.trim(),
+    type: document.getElementById('e_type').value,
+    contactId: document.getElementById('e_contact').value || null,
+    direction: document.getElementById('e_direction').value,
+    enableTracking: document.getElementById('e_tracking').checked,
+  };
+
+  await DB.addEmail(emailData);
+  toast('Email logged with tracking', 'success');
   closeModal();
   await renderEmails();
+  await loadStats();
 }
 
 function openInMailClient() {
@@ -165,15 +340,102 @@ async function showEmail(id) {
   const emails = await DB.getEmails();
   const e = emails.find(x => x.id === id);
   if (!e) return;
+
+  // Auto-mark received emails as read
+  if (e.direction === 'received' && !e.isRead) {
+    await DB.updateEmail(id, { isRead: true, readAt: new Date().toISOString() });
+    e.isRead = true;
+    e.readAt = new Date().toISOString();
+    renderEmails();
+    loadStats();
+  }
+
   const c = e.contactId ? await DB.getContact(e.contactId) : null;
+  const isSent = (e.direction || 'sent') === 'sent';
+
   document.getElementById('eDetailSubject').textContent = e.subject;
+
+  // Tracking info section
+  let trackingSection = '';
+  if (isSent && e.trackingId) {
+    trackingSection = `
+      <div class="detail-section">
+        <div class="detail-section-title">📊 Open Tracking</div>
+        <div class="email-tracking-detail">
+          <div class="email-tracking-detail-item">
+            <span class="email-tracking-detail-label">Tracking ID</span>
+            <span class="email-tracking-detail-value" style="font-family:var(--mono);font-size:12px">${e.trackingId}</span>
+          </div>
+          <div class="email-tracking-detail-item">
+            <span class="email-tracking-detail-label">Times Opened</span>
+            <span class="email-tracking-detail-value">
+              ${e.openCount > 0
+                ? `<span class="email-track-badge email-track-badge--opened">${e.openCount} open${e.openCount > 1 ? 's' : ''}</span>`
+                : `<span class="email-track-badge email-track-badge--pending">Not yet opened</span>`
+              }
+            </span>
+          </div>
+          ${e.lastOpenedAt ? `
+          <div class="email-tracking-detail-item">
+            <span class="email-tracking-detail-label">Last Opened</span>
+            <span class="email-tracking-detail-value">${formatDate(e.lastOpenedAt)} · ${relativeTime(e.lastOpenedAt)}</span>
+          </div>` : ''}
+          <div class="email-tracking-detail-item">
+            <span class="email-tracking-detail-label">Tracking Pixel</span>
+            <span class="email-tracking-detail-value">
+              <code style="font-size:11px;padding:4px 8px;background:var(--bg);border-radius:4px;word-break:break-all">&lt;img src="/track/${e.trackingId}.gif" /&gt;</code>
+            </span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Read receipt section for received emails
+  let readReceiptSection = '';
+  if (!isSent) {
+    readReceiptSection = `
+      <div class="detail-section">
+        <div class="detail-section-title">📬 Read Receipt</div>
+        <div class="email-tracking-detail">
+          <div class="email-tracking-detail-item">
+            <span class="email-tracking-detail-label">Status</span>
+            <span class="email-tracking-detail-value">
+              ${e.isRead
+                ? `<span class="email-track-badge email-track-badge--read">Read</span>`
+                : `<span class="email-track-badge email-track-badge--unread">Unread</span>`
+              }
+            </span>
+          </div>
+          ${e.readAt ? `
+          <div class="email-tracking-detail-item">
+            <span class="email-tracking-detail-label">Read At</span>
+            <span class="email-tracking-detail-value">${formatDate(e.readAt)} · ${relativeTime(e.readAt)}</span>
+          </div>` : ''}
+          <div class="email-tracking-detail-item" style="padding-top:8px">
+            ${!e.isRead
+              ? `<button class="btn-secondary" onclick="markAsRead('${id}')" style="font-size:12px;padding:5px 12px">✓ Mark as Read</button>`
+              : `<button class="btn-secondary" onclick="markAsUnread('${id}')" style="font-size:12px;padding:5px 12px">Mark as Unread</button>`
+            }
+          </div>
+        </div>
+      </div>`;
+  }
+
   document.getElementById('eDetailBody').innerHTML = `
     <div class="detail-section">
-      <div class="detail-field"><span class="detail-field-label">To</span><span class="detail-field-value"><a href="mailto:${e.to}">${e.to}</a></span></div>
+      <div class="detail-field"><span class="detail-field-label">Direction</span><span class="detail-field-value">
+        ${isSent
+          ? '<span class="email-dir-badge email-dir-badge--sent" style="font-size:12px">↑ Sent</span>'
+          : '<span class="email-dir-badge email-dir-badge--received" style="font-size:12px">↓ Received</span>'
+        }
+      </span></div>
+      <div class="detail-field"><span class="detail-field-label">${isSent ? 'To' : 'From'}</span><span class="detail-field-value"><a href="mailto:${e.to}">${e.to}</a></span></div>
       ${c ? `<div class="detail-field"><span class="detail-field-label">Contact</span><span class="detail-field-value">${c.name}</span></div>` : ''}
       <div class="detail-field"><span class="detail-field-label">Type</span><span class="detail-field-value"><span class="tag tag-blue">${e.type||'Email'}</span></span></div>
-      <div class="detail-field"><span class="detail-field-label">Sent</span><span class="detail-field-value">${formatDate(e.sentAt)} · ${relativeTime(e.sentAt)}</span></div>
+      <div class="detail-field"><span class="detail-field-label">${isSent ? 'Sent' : 'Received'}</span><span class="detail-field-value">${formatDate(e.sentAt)} · ${relativeTime(e.sentAt)}</span></div>
     </div>
+    ${trackingSection}
+    ${readReceiptSection}
     ${e.body ? `<div class="detail-section"><div class="detail-section-title">Body / Notes</div><p style="font-size:13.5px;color:var(--text-2);line-height:1.6;white-space:pre-wrap">${e.body}</p></div>` : ''}
     <div class="detail-section" style="border-bottom:none">
       <button class="btn-danger" onclick="deleteEmail('${id}')">Delete</button>
@@ -182,16 +444,76 @@ async function showEmail(id) {
   openDetail('emailDetail');
 }
 
+async function markAsRead(id) {
+  await DB.updateEmail(id, { isRead: true, readAt: new Date().toISOString() });
+  toast('Marked as read', 'success');
+  closeDetail();
+  await renderEmails();
+  await loadStats();
+}
+
+async function markAsUnread(id) {
+  await DB.updateEmail(id, { isRead: false });
+  toast('Marked as unread');
+  closeDetail();
+  await renderEmails();
+  await loadStats();
+}
+
 async function deleteEmail(id) {
   if (!confirm('Delete this email log?')) return;
   await DB.deleteEmail(id);
   toast('Email deleted');
   closeDetail();
   await renderEmails();
+  await loadStats();
 }
 
+async function simulateInboxSync() {
+  const btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg class="spin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Syncing...`;
+
+  // Simulate receiving a couple of emails from inbox
+  const sampleIncoming = [
+    {
+      to: 'me@nexcrm.com',
+      subject: 'Re: Cloud Migration Proposal - NexCRM',
+      body: 'Hi,\n\nThank you for sending the proposal. We have reviewed it internally and would like to schedule a follow-up call this week.\n\nBest regards,\nPriya Sharma',
+      type: 'Follow-up',
+      direction: 'received',
+      contactId: null,
+    },
+    {
+      to: 'me@nexcrm.com',
+      subject: 'Meeting Invitation: Q2 Planning',
+      body: 'You are invited to our Q2 planning session. Please review the attached agenda before the meeting.\n\nRegards,\nRahul Mehta',
+      type: 'Meeting Request',
+      direction: 'received',
+      contactId: null,
+    },
+  ];
+
+  // Add with slight delay for effect
+  for (const email of sampleIncoming) {
+    await new Promise(r => setTimeout(r, 800));
+    await DB.addEmail(email);
+  }
+
+  await new Promise(r => setTimeout(r, 400));
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Sync Inbox`;
+
+  toast(`Synced ${sampleIncoming.length} new emails`, 'success');
+  await renderEmails();
+  await loadStats();
+}
+
+// Init
 if (getParam('new') === '1' || getParam('contact')) setTimeout(openLogEmail, 100);
 renderEmails();
+loadStats();
 </script>
 </body>
 </html>
