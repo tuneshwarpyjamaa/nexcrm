@@ -2,6 +2,85 @@
 // NexCRM — App Utilities
 // =============================================
 
+// ---- Service Worker Registration (PWA) ----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then((reg) => {
+        console.log('[NexCRM] Service Worker registered:', reg.scope);
+        // Check for updates periodically
+        setInterval(() => reg.update(), 60 * 60 * 1000); // hourly
+      })
+      .catch((err) => console.warn('[NexCRM] SW registration failed:', err));
+  });
+}
+
+// ---- PWA Install Prompt ----
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Show install banner if not dismissed before
+  if (!localStorage.getItem('nexcrm_pwa_dismissed')) {
+    showInstallBanner();
+  }
+});
+
+function showInstallBanner() {
+  if (!deferredInstallPrompt) return;
+  const banner = document.createElement('div');
+  banner.className = 'pwa-install-banner';
+  banner.innerHTML = `
+    <div class="pwa-install-content">
+      <span class="pwa-install-icon">📱</span>
+      <div class="pwa-install-text">
+        <strong>Install NexCRM</strong>
+        <span>Add to home screen for a faster, offline-ready experience</span>
+      </div>
+    </div>
+    <div class="pwa-install-actions">
+      <button class="pwa-install-btn" onclick="installPWA()">Install</button>
+      <button class="pwa-dismiss-btn" onclick="dismissInstall(this)">✕</button>
+    </div>
+  `;
+  document.body.appendChild(banner);
+  requestAnimationFrame(() => banner.classList.add('show'));
+}
+
+function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then((result) => {
+    if (result.outcome === 'accepted') {
+      toast('NexCRM installed! 🎉', 'success');
+    }
+    deferredInstallPrompt = null;
+    const banner = document.querySelector('.pwa-install-banner');
+    if (banner) banner.remove();
+  });
+}
+
+function dismissInstall(btn) {
+  localStorage.setItem('nexcrm_pwa_dismissed', '1');
+  const banner = btn.closest('.pwa-install-banner');
+  if (banner) { banner.classList.remove('show'); setTimeout(() => banner.remove(), 300); }
+}
+
+// ---- Offline Status Indicator ----
+window.addEventListener('online', () => {
+  document.body.classList.remove('is-offline');
+  toast('Back online ✓', 'success');
+});
+
+window.addEventListener('offline', () => {
+  document.body.classList.add('is-offline');
+  toast('You are offline — changes saved locally', 'error');
+});
+
+if (!navigator.onLine) {
+  document.body.classList.add('is-offline');
+}
+
 // Authentication check
 window.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('access_token');
@@ -19,9 +98,60 @@ function logout() {
 function toggleSidebar() {
   const s = document.getElementById('sidebar');
   const m = document.querySelector('.main-content');
-  s.classList.toggle('collapsed');
-  if (m) m.classList.toggle('collapsed');
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    // Mobile: overlay sidebar
+    s.classList.toggle('mobile-open');
+    let backdrop = document.querySelector('.sidebar-backdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.className = 'sidebar-backdrop';
+      backdrop.addEventListener('click', closeMobileSidebar);
+      document.body.appendChild(backdrop);
+    }
+    if (s.classList.contains('mobile-open')) {
+      requestAnimationFrame(() => backdrop.classList.add('show'));
+    } else {
+      backdrop.classList.remove('show');
+    }
+  } else {
+    // Desktop: collapse sidebar
+    s.classList.toggle('collapsed');
+    if (m) m.classList.toggle('collapsed');
+  }
 }
+
+function closeMobileSidebar() {
+  const s = document.getElementById('sidebar');
+  const backdrop = document.querySelector('.sidebar-backdrop');
+  s.classList.remove('mobile-open');
+  if (backdrop) backdrop.classList.remove('show');
+}
+
+// Close mobile sidebar when clicking a nav link
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 768 && e.target.closest('.sidebar .nav-item')) {
+    closeMobileSidebar();
+  }
+});
+
+// ---- Mobile search box expand on tap ----
+document.addEventListener('click', (e) => {
+  if (window.innerWidth > 768) return;
+  const searchBox = e.target.closest('.search-box');
+  if (searchBox && !searchBox.classList.contains('expanded')) {
+    e.preventDefault();
+    searchBox.classList.add('expanded');
+    const input = searchBox.querySelector('input');
+    if (input) input.focus();
+    return;
+  }
+  // Click outside search — collapse it
+  if (!e.target.closest('.search-box') && !e.target.closest('.search-results')) {
+    document.querySelectorAll('.search-box.expanded').forEach(sb => sb.classList.remove('expanded'));
+  }
+});
 
 // ---- Toast Notifications ----
 function toast(msg, type = 'default') {

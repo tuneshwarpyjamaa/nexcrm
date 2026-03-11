@@ -157,6 +157,21 @@ a { text-decoration: none; color: inherit; }
   border-top: 1px solid var(--border-light);
 }
 
+.sidebar-logout svg {
+  color: var(--text-3);
+  opacity: 0.7;
+}
+
+.sidebar-logout:hover {
+  background: rgba(220, 38, 38, 0.15) !important;
+  color: #fca5a5 !important;
+}
+
+.sidebar-logout:hover svg {
+  color: #fca5a5 !important;
+  opacity: 1;
+}
+
 /* ---- Main Content ---- */
 .main-content {
   flex: 1;
@@ -1155,20 +1170,526 @@ tbody tr { cursor: pointer; transition: background var(--transition); }
 .detail-field-value a { color: var(--accent); }
 
 /* ---- Responsive ---- */
+
+/* Tablet: 1024px and below */
 @media (max-width: 1024px) {
   .dashboard-grid { grid-template-columns: 1fr 1fr; }
   .dashboard-grid-2 { grid-template-columns: 1fr; }
+  .deals-summary { grid-template-columns: repeat(3, 1fr); }
+  .data-stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Mobile: 768px and below — full mobile overhaul */
 @media (max-width: 768px) {
-  .sidebar { width: var(--sidebar-collapsed); }
-  .sidebar .logo-text, .sidebar .nav-item span { opacity: 0; width: 0; }
-  .main-content { margin-left: var(--sidebar-collapsed); }
+  /* -- Sidebar: slide-out overlay on mobile -- */
+  .sidebar {
+    width: var(--sidebar-w);
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar .logo-text,
+  .sidebar .nav-item span {
+    opacity: 1;
+    width: auto;
+  }
+
+  /* Sidebar backdrop */
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* -- Main content: full width on mobile -- */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  /* -- Topbar: compact mobile layout -- */
+  .topbar {
+    padding: 0 14px;
+    height: 54px;
+    gap: 8px;
+  }
+
+  .page-title {
+    font-size: 15px;
+  }
+
+  .topbar-right {
+    gap: 6px;
+  }
+
+  /* Hide search box on mobile, show search icon instead */
+  .search-box {
+    min-width: unset;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: width 0.25s ease, border-radius 0.25s ease;
+  }
+
+  .search-box input {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    transition: width 0.25s ease, opacity 0.2s ease;
+  }
+
+  .search-box.expanded {
+    width: 200px;
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+  }
+
+  .search-box.expanded input {
+    width: 100%;
+    opacity: 1;
+    padding: 0;
+  }
+
+  .btn-primary svg { width: 15px; height: 15px; }
+
+  /* Hide button text on small mobile */
+  .topbar .btn-primary span,
+  .topbar .btn-primary:not(:has(svg))::after {
+    display: none;
+  }
+
+  /* -- Page Body: tighter padding -- */
+  .page-body {
+    padding: 14px;
+  }
+
+  /* -- Grids: single column on mobile -- */
   .dashboard-grid { grid-template-columns: 1fr; }
-  .search-box { min-width: 160px; }
+  .dashboard-grid-2 { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .form-row { grid-template-columns: 1fr; }
-  .detail-panel { width: 100%; }
+  .deals-summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .data-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .settings-form-row { grid-template-columns: 1fr; }
+
+  /* -- Stats cards: compact on mobile -- */
+  .stat-card {
+    padding: 14px 16px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  /* -- Tables: horizontal scroll with better touch -- */
+  .table-wrap {
+    border-radius: var(--radius-sm);
+    margin: 0 -14px;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
+
+  table { min-width: 600px; }
+
+  tbody td {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  thead th {
+    padding: 12px 14px;
+    font-size: 11px;
+  }
+
+  /* -- Cards: tighter padding on mobile -- */
+  .card {
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  /* -- Detail panel: full-screen on mobile -- */
+  .detail-panel {
+    width: 100%;
+    border-left: none;
+    padding: 16px;
+  }
+
+  /* -- Modals: full-width on mobile -- */
+  .modal {
+    width: 95%;
+    max-width: 100%;
+    padding: 18px;
+    border-radius: 12px;
+    max-height: 85vh;
+  }
+
+  .modal-wide {
+    max-width: 100%;
+  }
+
+  /* -- Kanban: horizontal scroll with snap -- */
+  .kanban-board {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-left: 0;
+    gap: 10px;
+  }
+
+  .kanban-col {
+    min-width: 260px;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+
+  /* -- Buttons: minimum 44px touch target -- */
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+  }
+
+  .btn-icon svg { width: 18px; height: 18px; }
+
+  /* -- Form inputs: larger touch targets -- */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="date"],
+  input[type="url"],
+  select,
+  textarea {
+    padding: 12px;
+    font-size: 16px; /* prevents iOS zoom on focus */
+    min-height: 44px;
+  }
+
+  /* -- Quick add grid: 2 columns with bigger targets -- */
+  .quick-add-btn {
+    padding: 16px;
+    min-height: 80px;
+  }
+
+  /* -- Toast: bottom center on mobile -- */
+  .toast-wrap {
+    right: 14px;
+    left: 14px;
+    bottom: 14px;
+  }
+
+  .toast {
+    max-width: 100%;
+  }
+
+  /* -- Search results dropdown -- */
+  .search-results {
+    right: 14px;
+    left: 14px;
+    width: auto;
+    top: calc(54px + 8px);
+  }
+
+  /* -- Filter inputs -- */
+  .filter-input {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .page-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .toolbar-left, .toolbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* -- Report metrics -- */
+  .report-metric {
+    padding: 14px;
+  }
+
+  .report-metric-value {
+    font-size: 24px;
+  }
+
+  .bar-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .bar-row-label {
+    width: 80px;
+    font-size: 11.5px;
+  }
+
+  /* -- Notes grid: single column -- */
+  #notesGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* -- View toggle -- */
+  .view-toggle {
+    width: 100%;
+  }
+
+  .view-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+  }
 }
+
+/* Small mobile: 480px and below */
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .deals-summary { grid-template-columns: 1fr; }
+  .data-stats-grid { grid-template-columns: 1fr; }
+  .quick-add-grid { grid-template-columns: 1fr; }
+
+  .page-title { font-size: 14px; }
+
+  .topbar { padding: 0 10px; }
+  .page-body { padding: 10px; }
+
+  /* Form actions stack vertically */
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button,
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Settings layout fixes */
+  .settings-form-row { gap: 10px; }
+
+  .data-actions-row {
+    flex-direction: column;
+  }
+
+  .data-actions-row button,
+  .data-actions-row label {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ---- PWA Install Banner ---- */
+.pwa-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pwa-install-banner.show {
+  transform: translateY(0);
+}
+
+.pwa-install-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-install-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.pwa-install-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pwa-install-text strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pwa-install-text span {
+  font-size: 12.5px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pwa-install-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pwa-install-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.pwa-install-btn:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.pwa-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 18px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.pwa-dismiss-btn:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ---- Offline Status Indicator ---- */
+body.is-offline::before {
+  content: '⚡ Offline Mode';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  color: #fff;
+  text-align: center;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  z-index: 9999;
+  letter-spacing: 0.3px;
+}
+
+body.is-offline .topbar {
+  top: 26px;
+}
+
+body.is-offline .sidebar {
+  top: 26px;
+}
+
+/* ---- Touch-friendly improvements ---- */
+@media (pointer: coarse) {
+  /* Larger touch targets for coarse pointers (touch screens) */
+  .nav-item {
+    padding: 12px 10px;
+    min-height: 44px;
+  }
+
+  .task-check {
+    width: 24px;
+    height: 24px;
+  }
+
+  .kanban-card {
+    padding: 14px;
+  }
+
+  .activity-item {
+    padding: 12px 0;
+  }
+
+  tbody tr td {
+    padding: 14px;
+  }
+
+  /* Disable hover effects on touch (they cause sticky states) */
+  .stat-card:hover,
+  .kanban-card:hover,
+  .note-card:hover,
+  .data-stat-tile:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+  }
+}
+
+/* ---- Safe area padding for notched devices ---- */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .sidebar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pwa-install-banner {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .toast-wrap {
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+}
+
 
 /* ---- Scrollbar ---- */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
