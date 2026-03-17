@@ -236,6 +236,23 @@ const DB = {
       body: JSON.stringify(s)
     });
   },
+
+  // --- Subscriptions ---
+  getSubscription: async () => {
+    const response = await fetch('/api/subscriptions/me', {
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  },
+  upgradeSubscription: async () => {
+    const response = await fetch('/api/subscriptions/subscribe', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ action: 'upgrade', plan_name: 'premium' })
+    });
+    return await response.json();
+  },
 };
 
 

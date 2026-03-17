@@ -13,6 +13,11 @@ class User(Base):
     password_hash = Column(String, nullable=True)
     provider = Column(String, nullable=False, default='local')
     google_id = Column(String, unique=True, nullable=True)
+    plan_name = Column(String, nullable=False, server_default='free')
+    subscription_status = Column(String, nullable=False, server_default='active')
+    subscription_end_date = Column(DateTime(timezone=True), nullable=True)
+    razorpay_customer_id = Column(String, nullable=True)
+    razorpay_subscription_id = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Contact(Base):

@@ -207,6 +207,9 @@ async function loadSettings() {
   const filled = fields.filter(f => f && f.trim()).length;
   const pct = Math.round((filled / fields.length) * 100);
 
+  const sub = await DB.getSubscription() || { plan_name: 'free' };
+  const isPremium = sub.plan_name === 'premium';
+
   document.getElementById('summaryContent').innerHTML = `
     <div class="account-summary-item">
       <div class="summary-icon" style="background:var(--accent-light)">👤</div>
@@ -244,10 +247,10 @@ async function loadSettings() {
 
     <div class="plan-badge-wrap">
       <div class="plan-badge-left">
-        <span class="plan-badge-icon">✨</span>
-        <div class="plan-badge-text"><strong>Free Plan</strong><br>Basic features</div>
+        <span class="plan-badge-icon">${isPremium ? '👑' : '✨'}</span>
+        <div class="plan-badge-text"><strong>${isPremium ? 'Premium Plan' : 'Free Plan'}</strong><br>${isPremium ? 'All features unlocked' : 'Basic features'}</div>
       </div>
-      <button class="plan-badge-cta" onclick="toast('Coming soon!','info')">Upgrade</button>
+      ${!isPremium ? `<button class="plan-badge-cta" onclick="handleUpgrade()">Upgrade</button>` : `<div style="color:var(--green); font-weight:500; font-size:13px; margin:auto 0;">Active</div>`}
     </div>
 
     <div class="profile-completion">
@@ -376,6 +379,21 @@ function deleteAccount() {
   localStorage.removeItem('crm_notif_prefs');
   toast('Account data deleted', 'success');
   setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+}
+
+async function handleUpgrade() {
+  if(!confirm('Upgrade to Premium Plan for ₹999/month?')) return;
+  try {
+    const res = await DB.upgradeSubscription();
+    if(res && res.success) {
+      toast(res.message, 'success');
+      loadSettings();
+    } else {
+      toast('Upgrade failed', 'error');
+    }
+  } catch(e) {
+    toast('Error upgrading plan', 'error');
+  }
 }
 
 loadSettings();

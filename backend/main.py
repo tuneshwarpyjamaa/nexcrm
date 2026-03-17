@@ -11,6 +11,7 @@ from emails.router import router as emails_router, tracking_router
 from activity.router import router as activity_router
 from settings.router import router as settings_router
 from auth.router import router as auth_router
+from subscriptions.router import router as subscriptions_router
 
 @asynccontextmanager
 async def lifespan(app):
@@ -36,7 +37,7 @@ app.include_router(activity_router)
 app.include_router(settings_router)
 app.include_router(auth_router)
 app.include_router(tracking_router)
-
+app.include_router(subscriptions_router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")

@@ -51,6 +51,7 @@ async def mock_db(monkeypatch):
     import emails.router
     import activity.router
     import settings.router
+    import subscriptions.router
     
     mock_get_pool = AsyncMock(return_value=mock_pool)
     
@@ -63,5 +64,6 @@ async def mock_db(monkeypatch):
     monkeypatch.setattr(emails.router, "get_pool", mock_get_pool)
     monkeypatch.setattr(activity.router, "get_pool", mock_get_pool)
     monkeypatch.setattr(settings.router, "get_pool", mock_get_pool)
+    monkeypatch.setattr(subscriptions.router, "get_pool", mock_get_pool)
     
     return mock_conn
