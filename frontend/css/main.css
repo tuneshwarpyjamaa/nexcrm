@@ -3317,3 +3317,76 @@ section[id] { scroll-margin-top: 84px; }
     height: 13px;
   }
 }
+
+/* ---- LP Tooltip, Logos & Extras ---- */
+.lp-text-link {
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 14.5px;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.lp-text-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.lp-has-tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+.lp-tooltip {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: var(--text);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+}
+.lp-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--text) transparent transparent transparent;
+}
+.lp-has-tooltip:hover .lp-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.lp-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  transition: color var(--transition);
+}
+.lp-logo-wrap:hover {
+  color: var(--text);
+}
+.lp-logo-svg {
+  height: 28px;
+  max-width: 100%;
+  opacity: 0.6;
+  filter: grayscale(100%);
+  transition: all var(--transition);
+}
+.lp-logo-wrap:hover .lp-logo-svg {
+  opacity: 1;
+  filter: grayscale(0%);
+}
