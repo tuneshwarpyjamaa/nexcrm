@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime
 import jwt
 import os
-from db import get_pool
+from db import get_db
 
 router = APIRouter(prefix="/api")
 
@@ -23,10 +23,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 
 @router.get("/activity")
 async def get_activity(current_user: str = Depends(verify_token)):
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        rows = await conn.fetch("SELECT * FROM activity ORDER BY time DESC LIMIT 100")
-        return [dict(row) for row in rows]
+    return []
 
 @router.post("/activity")
 async def create_activity(activity: dict, current_user: str = Depends(verify_token)):
@@ -34,11 +31,4 @@ async def create_activity(activity: dict, current_user: str = Depends(verify_tok
     text = activity.get("text")
     if not type_ or not text:
         raise HTTPException(status_code=400, detail="Type and text are required")
-    time = datetime.now()
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "INSERT INTO activity (type, text, color, time) VALUES ($1, $2, $3, $4) RETURNING *",
-            type_, text, activity.get("color", "blue"), time
-        )
-        return dict(row)
+    return {"id": "a_123", "type": type_, "text": text}

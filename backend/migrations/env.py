@@ -13,14 +13,8 @@ from models.models import Base
 # Load environment variables
 load_dotenv()
 
-# Build DB URL from .env
-db_user = os.getenv("DB_USER")
-db_pass = os.getenv("DB_PASS")
-db_host = os.getenv("DB_HOST", "localhost")
-db_port = os.getenv("DB_PORT", "5432")
-db_name = os.getenv("DB_NAME")
-
-db_url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+# Use DATABASE_URL from environment or fallback to the connection string
+db_url = os.getenv("DATABASE_URL", "postgresql://postgres.zbqchwasohrlittfxieb:[YOUR-PASSWORD]@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -2,15 +2,15 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 import os
-import asyncpg
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from auth.schemas import UserLogin, UserCreate, Token, GoogleSignin
-from db import get_pool
+from db import get_db
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 from authlib.integrations.base_client import OAuthError
 from google.auth.transport import requests
 from google.oauth2 import id_token
+import asyncpg
 
 router = APIRouter(prefix="/api")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -53,17 +53,18 @@ async def login(user: UserLogin):
     email = user.email
     password = user.password
 
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow("SELECT password_hash FROM users WHERE email = $1", email)
-        if not row or not verify_password(password, row["password_hash"]):
-            raise HTTPException(status_code=401, detail="Invalid email or password")
-        
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"sub": email}, expires_delta=access_token_expires
-        )
-        return {"access_token": access_token, "token_type": "bearer"}
+    db = await get_db()
+    row = await db.fetchrow("SELECT password_hash FROM users WHERE email = $1", email)
+    if not row or not verify_password(password, row[0]):
+        await db.close()
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": email}, expires_delta=access_token_expires
+    )
+    await db.close()
+    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register")
 async def register(user: UserCreate):
@@ -72,13 +73,15 @@ async def register(user: UserCreate):
     password = user.password
     
     hashed_password = get_password_hash(password)
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        try:
-            await conn.execute("INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)", name, email, hashed_password)
-            return {"message": "User created successfully"}
-        except asyncpg.UniqueViolationError:
-            raise HTTPException(status_code=400, detail="Email already exists")
+    db = await get_db()
+    try:
+        await db.execute("INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)", name, email, hashed_password)
+        await db.commit()
+        await db.close()
+        return {"message": "User created successfully"}
+    except asyncpg.IntegrityError:
+        await db.close()
+        raise HTTPException(status_code=400, detail="Email already exists")
 
 @router.get("/auth/google/client_id")
 async def get_google_client_id():
@@ -94,20 +97,20 @@ async def google_signin(data: GoogleSignin):
         email = idinfo['email']
         name = idinfo['name']
         google_id = idinfo['sub']
-        pool = await get_pool()
-        async with pool.acquire() as conn:
-            # Check if user exists by google_id
-            row = await conn.fetchrow("SELECT id FROM users WHERE google_id = $1", google_id)
+        db = await get_db()
+        row = await db.fetchrow("SELECT id FROM users WHERE google_id = $1", google_id)
+        if row:
+            user_id = row[0]
+        else:
+            # Check if email exists with local provider
+            row = await db.fetchrow("SELECT id FROM users WHERE email = $1 AND provider = 'local'", email)
             if row:
-                user_id = row['id']
-            else:
-                # Check if email exists with local provider
-                row = await conn.fetchrow("SELECT id FROM users WHERE email = $1 AND provider = 'local'", email)
-                if row:
-                    raise HTTPException(status_code=400, detail="Email already exists with local account")
-                # Create new user
-                row = await conn.fetchrow("INSERT INTO users (name, email, provider, google_id) VALUES ($1, $2, 'google', $3) RETURNING id", name, email, google_id)
-                user_id = row['id']
+                await db.close()
+                raise HTTPException(status_code=400, detail="Email already exists with local account")
+            # Create new user
+            row = await db.fetchrow("INSERT INTO users (name, email, provider, google_id) VALUES ($1, $2, 'google', $3) RETURNING id", name, email, google_id)
+            user_id = row[0]
+        await db.close()
         access_token = create_access_token(data={"sub": email})
         return {"access_token": access_token, "token_type": "bearer"}
     except ValueError:

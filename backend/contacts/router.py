@@ -6,7 +6,8 @@ import jwt
 import os
 from typing import List
 from contacts.schemas import Contact, ContactCreate, ContactUpdate
-from db import get_pool
+from db import get_db
+from simple_cache import get, set, clear_pattern
 
 router = APIRouter(prefix="/api")
 
@@ -37,45 +38,120 @@ def format_contact(row):
 
 @router.get("/contacts", response_model=List[Contact])
 async def get_contacts(current_user: str = Depends(verify_token)):
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        rows = await conn.fetch('SELECT * FROM contacts ORDER BY contacts."createdAt" DESC')
-        return [format_contact(row) for row in rows]
+    # Check cache first
+    cache_key_str = f"contacts_{current_user}"
+    cached_data = get(cache_key_str)
+    if cached_data is not None:
+        return cached_data
+    
+    # If not cached, fetch from database
+    db = await get_db()
+    try:
+        rows = await db.fetch('SELECT * FROM contacts ORDER BY "createdAt" DESC')
+        contacts = []
+        for row in rows:
+            contact = {
+                'id': row['id'],
+                'name': row['name'],
+                'email': row['email'],
+                'phone': row['phone'],
+                'company': row['company'],
+                'title': row['title'],
+                'status': row['status'],
+                'tags': json.loads(row['tags']) if row['tags'] else [],
+                'linkedin': row['linkedin'],
+                'notes': row['notes'],
+                'createdAt': str(row['createdAt']),
+                'updatedAt': str(row['updatedAt'])
+            }
+            contacts.append(format_contact(contact))
+        # Cache the result
+        set(cache_key_str, contacts)
+        return contacts
+    finally:
+        await db.close()
 
 @router.post("/contacts", response_model=Contact)
 async def create_contact(contact: ContactCreate, current_user: str = Depends(verify_token)):
+    # Clear cache on create
+    clear_pattern("contacts_")
+    
     id = f"c_{int(datetime.now().timestamp() * 1000)}"
     createdAt = datetime.now()
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        await conn.execute(
+    db = await get_db()
+    try:
+        await db.execute(
             'INSERT INTO contacts (id, name, email, phone, company, title, status, tags, linkedin, notes, "createdAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
             id, contact.name, contact.email, contact.phone, contact.company, contact.title, contact.status, json.dumps(contact.tags), contact.linkedin, contact.notes, createdAt
         )
-        row = await conn.fetchrow("SELECT * FROM contacts WHERE id = $1", id)
-        return format_contact(row)
+        row = await db.fetchrow("SELECT * FROM contacts WHERE id = $1", id)
+        contact_data = {
+            'id': row['id'],
+            'name': row['name'],
+            'email': row['email'],
+            'phone': row['phone'],
+            'company': row['company'],
+            'title': row['title'],
+            'status': row['status'],
+            'tags': json.loads(row['tags']) if row['tags'] else [],
+            'linkedin': row['linkedin'],
+            'notes': row['notes'],
+            'createdAt': str(row['createdAt']),
+            'updatedAt': str(row['updatedAt'])
+        }
+        return format_contact(contact_data)
+    finally:
+        await db.close()
 
 @router.put("/contacts/{id}", response_model=Contact)
 async def update_contact(id: str, updates: ContactUpdate, current_user: str = Depends(verify_token)):
+    # Clear cache on update
+    clear_pattern("contacts_")
+    
     update_data = updates.dict(exclude_unset=True)
     update_data["updatedAt"] = datetime.now()
     
     if "tags" in update_data and update_data["tags"] is not None:
         update_data["tags"] = json.dumps(update_data["tags"])
         
-    fields = ", ".join(f'"{k}" = ${i+2}' for i, k in enumerate(update_data.keys()))
-    values = list(update_data.values())
-    values.insert(0, id)
+    set_clauses = []
+    values = []
+    for i, (key, value) in enumerate(update_data.items()):
+        set_clauses.append(f'"{key}" = ${i+1}')
+        values.append(value)
     
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        await conn.execute(f"UPDATE contacts SET {fields} WHERE id = $1", *values)
-        row = await conn.fetchrow("SELECT * FROM contacts WHERE id = $1", id)
-        return format_contact(row)
+    values.append(id)
+    
+    db = await get_db()
+    try:
+        await db.execute(f"UPDATE contacts SET {', '.join(set_clauses)} WHERE id = ${len(values)}", *values)
+        row = await db.fetchrow("SELECT * FROM contacts WHERE id = $1", id)
+        contact_data = {
+            'id': row['id'],
+            'name': row['name'],
+            'email': row['email'],
+            'phone': row['phone'],
+            'company': row['company'],
+            'title': row['title'],
+            'status': row['status'],
+            'tags': json.loads(row['tags']) if row['tags'] else [],
+            'linkedin': row['linkedin'],
+            'notes': row['notes'],
+            'createdAt': str(row['createdAt']),
+            'updatedAt': str(row['updatedAt'])
+        }
+        return format_contact(contact_data)
+    finally:
+        await db.close()
 
 @router.delete("/contacts/{id}")
 async def delete_contact(id: str, current_user: str = Depends(verify_token)):
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        await conn.execute("DELETE FROM contacts WHERE id = $1", id)
+    # Clear cache on delete
+    clear_pattern("contacts_")
+    
+    db = await get_db()
+    try:
+        await db.execute("DELETE FROM contacts WHERE id = $1", id)
         return {"success": True}
+    finally:
+        await db.close()

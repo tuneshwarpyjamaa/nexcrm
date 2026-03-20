@@ -4,29 +4,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-pool = None
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set")
 
-async def create_pool():
-    return await asyncpg.create_pool(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT")),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASS"),
-        min_size=2,
-        max_size=10,
-        command_timeout=30,
-        statement_cache_size=100,
-    )
+async def get_db():
+    return await asyncpg.connect(DATABASE_URL)
 
-async def get_pool():
-    global pool
-    if pool is None:
-        pool = await create_pool()
-    return pool
-
-async def close_pool():
-    global pool
-    if pool is not None:
-        await pool.close()
-        pool = None
+async def close_db(db):
+    await db.close()
