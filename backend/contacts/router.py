@@ -6,7 +6,7 @@ import jwt
 import os
 from typing import List
 from contacts.schemas import Contact, ContactCreate, ContactUpdate
-from db import get_db
+from db import get_db, close_db
 from simple_cache import get, set, clear_pattern
 
 router = APIRouter(prefix="/api")
@@ -69,7 +69,7 @@ async def get_contacts(current_user: str = Depends(verify_token)):
         set(cache_key_str, contacts)
         return contacts
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.post("/contacts", response_model=Contact)
 async def create_contact(contact: ContactCreate, current_user: str = Depends(verify_token)):
@@ -101,7 +101,7 @@ async def create_contact(contact: ContactCreate, current_user: str = Depends(ver
         }
         return format_contact(contact_data)
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.put("/contacts/{id}", response_model=Contact)
 async def update_contact(id: str, updates: ContactUpdate, current_user: str = Depends(verify_token)):
@@ -142,7 +142,7 @@ async def update_contact(id: str, updates: ContactUpdate, current_user: str = De
         }
         return format_contact(contact_data)
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.delete("/contacts/{id}")
 async def delete_contact(id: str, current_user: str = Depends(verify_token)):
@@ -154,4 +154,4 @@ async def delete_contact(id: str, current_user: str = Depends(verify_token)):
         await db.execute("DELETE FROM contacts WHERE id = $1", id)
         return {"success": True}
     finally:
-        await db.close()
+        await close_db(db)

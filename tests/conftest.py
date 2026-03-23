@@ -56,14 +56,21 @@ async def mock_db(monkeypatch):
     mock_get_pool = AsyncMock(return_value=mock_pool)
     
     monkeypatch.setattr(db, "get_pool", mock_get_pool)
-    monkeypatch.setattr(auth.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(contacts.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(deals.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(tasks.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(notes.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(emails.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(activity.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(settings.router, "get_pool", mock_get_pool)
-    monkeypatch.setattr(subscriptions.router, "get_pool", mock_get_pool)
+
+    for module in [auth.router, contacts.router, deals.router, tasks.router,
+                   notes.router, emails.router, activity.router, settings.router,
+                   subscriptions.router]:
+        if hasattr(module, "get_pool"):
+            monkeypatch.setattr(module, "get_pool", mock_get_pool)
+
+    # Also patch get_db if needed
+    mock_get_db = AsyncMock(return_value=mock_conn)
+    monkeypatch.setattr(db, "get_db", mock_get_db)
+
+    for module in [auth.router, contacts.router, deals.router, tasks.router,
+                   notes.router, emails.router, activity.router, settings.router,
+                   subscriptions.router]:
+        if hasattr(module, "get_db"):
+            monkeypatch.setattr(module, "get_db", mock_get_db)
     
     return mock_conn

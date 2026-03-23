@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import os
-from db import get_db, close_db
+from db import init_pool, close_pool
 from contacts.router import router as contacts_router
 from deals.router import router as deals_router
 from tasks.router import router as tasks_router
@@ -15,11 +15,11 @@ from subscriptions.router import router as subscriptions_router
 
 @asynccontextmanager
 async def lifespan(app):
-    # Startup: initialize database connection
-    db = await get_db()
+    # Startup: initialize database connection pool
+    await init_pool()
     yield
-    # Shutdown: close database connection
-    await close_db(db)
+    # Shutdown: close database connection pool
+    await close_pool()
 
 app = FastAPI(lifespan=lifespan)
 port = int(os.getenv("PORT", 3000))

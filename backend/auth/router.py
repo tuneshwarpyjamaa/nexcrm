@@ -5,7 +5,7 @@ import os
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from auth.schemas import UserLogin, UserCreate, Token, GoogleSignin
-from db import get_db
+from db import get_db, close_db
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 from authlib.integrations.base_client import OAuthError
 from google.auth.transport import requests
@@ -56,14 +56,14 @@ async def login(user: UserLogin):
     db = await get_db()
     row = await db.fetchrow("SELECT password_hash FROM users WHERE email = $1", email)
     if not row or not verify_password(password, row[0]):
-        await db.close()
+        await close_db(db)
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": email}, expires_delta=access_token_expires
     )
-    await db.close()
+    await close_db(db)
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register")
@@ -77,10 +77,10 @@ async def register(user: UserCreate):
     try:
         await db.execute("INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3)", name, email, hashed_password)
         await db.commit()
-        await db.close()
+        await close_db(db)
         return {"message": "User created successfully"}
     except asyncpg.IntegrityError:
-        await db.close()
+        await close_db(db)
         raise HTTPException(status_code=400, detail="Email already exists")
 
 @router.get("/auth/google/client_id")
@@ -105,12 +105,12 @@ async def google_signin(data: GoogleSignin):
             # Check if email exists with local provider
             row = await db.fetchrow("SELECT id FROM users WHERE email = $1 AND provider = 'local'", email)
             if row:
-                await db.close()
+                await close_db(db)
                 raise HTTPException(status_code=400, detail="Email already exists with local account")
             # Create new user
             row = await db.fetchrow("INSERT INTO users (name, email, provider, google_id) VALUES ($1, $2, 'google', $3) RETURNING id", name, email, google_id)
             user_id = row[0]
-        await db.close()
+        await close_db(db)
         access_token = create_access_token(data={"sub": email})
         return {"access_token": access_token, "token_type": "bearer"}
     except ValueError:

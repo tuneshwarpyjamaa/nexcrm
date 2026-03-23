@@ -7,7 +7,7 @@ import os
 from typing import List
 from deals.schemas import Deal, DealCreate, DealUpdate
 from simple_cache import get, set, clear_pattern
-from db import get_db
+from db import get_db, close_db
 
 router = APIRouter(prefix="/api")
 
@@ -57,7 +57,7 @@ async def get_deals(current_user: str = Depends(verify_token)):
         set(cache_key_str, deals)
         return deals
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.post("/deals", response_model=Deal)
 async def create_deal(deal: DealCreate, current_user: str = Depends(verify_token)):
@@ -88,7 +88,7 @@ async def create_deal(deal: DealCreate, current_user: str = Depends(verify_token
         }
         return deal_data
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.put("/deals/{id}", response_model=Deal)
 async def update_deal(id: str, updates: DealUpdate, current_user: str = Depends(verify_token)):
@@ -122,7 +122,7 @@ async def update_deal(id: str, updates: DealUpdate, current_user: str = Depends(
         'createdAt': str(row['createdAt']),
         'updatedAt': str(row['updatedAt'])
     }
-    await db.close()
+    await close_db(db)
     return deal_data
 
 @router.delete("/deals/{id}")
@@ -135,4 +135,4 @@ async def delete_deal(id: str, current_user: str = Depends(verify_token)):
         await db.execute("DELETE FROM deals WHERE id = $1", id)
         return {"success": True}
     finally:
-        await db.close()
+        await close_db(db)

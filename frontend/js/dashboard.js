@@ -10,17 +10,41 @@ async function renderDashboard() {
     DB.getNotes()
   ]);
 
-  const totalPipeline = deals.filter(d => d.stage !== 'Won' && d.stage !== 'Lost').reduce((s, d) => s + parseFloat(d.value || 0), 0);
-  const wonValue = deals.filter(d => d.stage === 'Won').reduce((s, d) => s + parseFloat(d.value || 0), 0);
-  const overdueTasks = tasks.filter(t => !t.done && t.dueDate && new Date(t.dueDate + 'T00:00:00') < new Date());
+  let totalPipeline = 0;
+  let wonValue = 0;
+  let activeDealsCount = 0;
+
+  for (let i = 0; i < deals.length; i++) {
+    const d = deals[i];
+    if (d.stage === 'Won') {
+      wonValue += parseFloat(d.value || 0);
+    } else if (d.stage !== 'Lost') {
+      totalPipeline += parseFloat(d.value || 0);
+      activeDealsCount++;
+    }
+  }
+
+  const overdueTasks = [];
+  let openTasksCount = 0;
+  const now = new Date();
+
+  for (let i = 0; i < tasks.length; i++) {
+    const t = tasks[i];
+    if (!t.done) {
+      openTasksCount++;
+      if (t.dueDate && new Date(t.dueDate + 'T00:00:00') < now) {
+        overdueTasks.push(t);
+      }
+    }
+  }
 
   // Stats
   document.getElementById('statsGrid').innerHTML = [
     { label: 'Total Contacts', value: contacts.length, icon: '👥', link: 'contacts.html', color: '#2563eb' },
-    { label: 'Active Deals', value: deals.filter(d => d.stage !== 'Won' && d.stage !== 'Lost').length, icon: '💼', link: 'deals.html', color: '#7c3aed' },
+    { label: 'Active Deals', value: activeDealsCount, icon: '💼', link: 'deals.html', color: '#7c3aed' },
     { label: 'Pipeline Value', value: formatMoney(totalPipeline), icon: '📈', link: 'deals.html', color: '#16a34a' },
     { label: 'Won Revenue', value: formatMoney(wonValue), icon: '🏆', link: 'deals.html', color: '#d97706' },
-    { label: 'Open Tasks', value: tasks.filter(t => !t.done).length, icon: '✅', link: 'tasks.html', color: '#dc2626', delta: overdueTasks.length > 0 ? `${overdueTasks.length} overdue` : null, negative: true },
+    { label: 'Open Tasks', value: openTasksCount, icon: '✅', link: 'tasks.html', color: '#dc2626', delta: overdueTasks.length > 0 ? `${overdueTasks.length} overdue` : null, negative: true },
     { label: 'Notes', value: notes.length, icon: '📝', link: 'notes.html', color: '#0891b2' },
   ].map(s => `
     <div class="stat-card" onclick="location.href='${s.link}'" style="border-top: 3px solid ${s.color}">

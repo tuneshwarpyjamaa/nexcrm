@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 import os
-from db import get_db
+from db import get_db, close_db
 
 router = APIRouter(prefix="/api")
 
