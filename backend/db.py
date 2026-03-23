@@ -1,5 +1,6 @@
 import asyncpg
 import os
+from typing import AsyncGenerator
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,10 +11,12 @@ if not DATABASE_URL:
 
 _pool = None
 
+
 async def init_pool():
     global _pool
     if _pool is None:
         _pool = await asyncpg.create_pool(DATABASE_URL)
+
 
 async def close_pool():
     global _pool
@@ -21,19 +24,16 @@ async def close_pool():
         await _pool.close()
         _pool = None
 
+
 async def get_pool():
     global _pool
     if _pool is None:
         await init_pool()
     return _pool
 
-async def get_db():
-    pool = await get_pool()
-    # To keep compatibility with existing `db = await get_db()` and `await close_db(db)` code,
-    # we can acquire a connection from the pool.
-    return await pool.acquire()
 
-async def close_db(db):
-    # Release the acquired connection back to the pool
+async def get_db() -> AsyncGenerator[asyncpg.Connection, None]:
+    """FastAPI dependency that yields a DB connection and guarantees release."""
     pool = await get_pool()
-    await pool.release(db)
+    async with pool.acquire() as conn:
+        yield conn
