@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 import os
 from db import init_pool, close_pool
+from middleware import SecurityHeadersMiddleware
 from contacts.router import router as contacts_router
 from deals.router import router as deals_router
 from tasks.router import router as tasks_router
@@ -22,6 +23,7 @@ async def lifespan(app):
     await close_pool()
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(SecurityHeadersMiddleware)
 port = int(os.getenv("PORT", 3000))
 
 
