@@ -1,34 +1,36 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime
-import jwt
-import os
-from db import get_db, close_db
+from db import get_db
+from auth.dependencies import verify_token
 
 router = APIRouter(prefix="/api")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
-ALGORITHM = "HS256"
-security = HTTPBearer()
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        return username
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+def _row_to_activity(row) -> dict:
+    return {
+        "id": row["id"],
+        "type": row["type"],
+        "text": row["text"],
+        "color": row["color"],
+        "time": str(row["time"]) if row["time"] else None,
+    }
+
 
 @router.get("/activity")
-async def get_activity(current_user: str = Depends(verify_token)):
-    return []
+async def get_activity(current_user: str = Depends(verify_token), db=Depends(get_db)):
+    rows = await db.fetch("SELECT * FROM activity ORDER BY time DESC LIMIT 100")
+    return [_row_to_activity(r) for r in rows]
+
 
 @router.post("/activity")
-async def create_activity(activity: dict, current_user: str = Depends(verify_token)):
+async def create_activity(activity: dict, current_user: str = Depends(verify_token), db=Depends(get_db)):
     type_ = activity.get("type")
     text = activity.get("text")
+    color = activity.get("color", "blue")
     if not type_ or not text:
-        raise HTTPException(status_code=400, detail="Type and text are required")
-    return {"id": "a_123", "type": type_, "text": text}
+        raise HTTPException(status_code=400, detail="type and text are required")
+    row = await db.fetchrow(
+        "INSERT INTO activity (type, text, color, time) VALUES ($1, $2, $3, $4) RETURNING *",
+        type_, text, color, datetime.now(),
+    )
+    return _row_to_activity(row)

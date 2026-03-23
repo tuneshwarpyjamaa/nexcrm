@@ -1,29 +1,24 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import jwt
-import os
-from db import get_db, close_db
+from db import get_db
+from auth.dependencies import verify_token
 
 router = APIRouter(prefix="/api")
 
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
-ALGORITHM = "HS256"
-security = HTTPBearer()
-
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        return username
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 @router.get("/settings")
-async def get_settings(current_user: str = Depends(verify_token)):
-    return {}
+async def get_settings(current_user: str = Depends(verify_token), db=Depends(get_db)):
+    rows = await db.fetch("SELECT key, value FROM settings")
+    return {row["key"]: row["value"] for row in rows}
+
 
 @router.post("/settings")
-async def update_settings(settings: dict, current_user: str = Depends(verify_token)):
+async def update_settings(
+    settings: dict, current_user: str = Depends(verify_token), db=Depends(get_db)
+):
+    for key, value in settings.items():
+        await db.execute(
+            "INSERT INTO settings (key, value) VALUES ($1, $2) "
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+            str(key), str(value),
+        )
     return {"success": True}
