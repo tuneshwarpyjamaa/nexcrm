@@ -201,10 +201,14 @@ function closeDetail() {
 
 // ---- Avatar Color ----
 const AVATAR_COLORS = ['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#be185d','#854d0e'];
+const _avatarCache = new Map();
 function avatarColor(name) {
+  if (_avatarCache.has(name)) return _avatarCache.get(name);
   let h = 0;
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  const color = AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  _avatarCache.set(name, color);
+  return color;
 }
 
 function initials(name) {
@@ -301,9 +305,11 @@ function globalSearch(q) {
   if (!q || q.length < 2) { box.classList.remove('open'); return; }
   searchTimer = setTimeout(async () => {
     const results = [];
-    const contacts = await DB.getContacts();
-    const deals = await DB.getDeals();
-    const tasks = await DB.getTasks();
+    const [contacts, deals, tasks] = await Promise.all([
+      DB.getContacts(),
+      DB.getDeals(),
+      DB.getTasks()
+    ]);
     contacts.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || (c.company||'').toLowerCase().includes(q.toLowerCase())).slice(0,4).forEach(c => {
       results.push({ type: 'Contact', name: c.name, sub: c.company, link: 'contacts.html', id: c.id, icon: 'contact' });
     });

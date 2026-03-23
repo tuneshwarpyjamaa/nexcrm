@@ -11,15 +11,20 @@ function getAuthHeaders() {
   };
 }
 
+let _cache = { contacts: null, deals: null, tasks: null, notes: null };
+
 const DB = {
   // --- Contacts ---
   getContacts: async () => {
+    if (_cache.contacts) return _cache.contacts;
     const response = await fetch('/api/contacts', {
       headers: getAuthHeaders()
     });
-    return await response.json();
+    _cache.contacts = await response.json();
+    return _cache.contacts;
   },
   addContact: async (c) => {
+    _cache.contacts = null;
     c.id = 'c_' + Date.now();
     c.createdAt = new Date().toISOString();
     c.tags = c.tags || [];
@@ -33,6 +38,7 @@ const DB = {
     return newContact;
   },
   updateContact: async (id, data) => {
+    _cache.contacts = null;
     const response = await fetch(`/api/contacts/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -41,6 +47,7 @@ const DB = {
     return await response.json();
   },
   deleteContact: async (id) => {
+    _cache.contacts = null;
     const contact = await DB.getContact(id);
     await fetch(`/api/contacts/${id}`, { 
       method: 'DELETE',
@@ -55,12 +62,15 @@ const DB = {
 
   // --- Deals ---
   getDeals: async () => {
+    if (_cache.deals) return _cache.deals;
     const response = await fetch('/api/deals', {
       headers: getAuthHeaders()
     });
-    return await response.json();
+    _cache.deals = await response.json();
+    return _cache.deals;
   },
   addDeal: async (d) => {
+    _cache.deals = null;
     d.id = 'd_' + Date.now();
     d.createdAt = new Date().toISOString();
     d.stage = d.stage || 'Lead';
@@ -74,6 +84,7 @@ const DB = {
     return newDeal;
   },
   updateDeal: async (id, data) => {
+    _cache.deals = null;
     const response = await fetch(`/api/deals/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -82,6 +93,7 @@ const DB = {
     return await response.json();
   },
   deleteDeal: async (id) => {
+    _cache.deals = null;
     const deal = await DB.getDeal(id);
     await fetch(`/api/deals/${id}`, { 
       method: 'DELETE',
@@ -96,12 +108,15 @@ const DB = {
 
   // --- Tasks ---
   getTasks: async () => {
+    if (_cache.tasks) return _cache.tasks;
     const response = await fetch('/api/tasks', {
       headers: getAuthHeaders()
     });
-    return await response.json();
+    _cache.tasks = await response.json();
+    return _cache.tasks;
   },
   addTask: async (t) => {
+    _cache.tasks = null;
     t.id = 't_' + Date.now();
     t.createdAt = new Date().toISOString();
     t.done = false;
@@ -115,6 +130,7 @@ const DB = {
     return newTask;
   },
   updateTask: async (id, data) => {
+    _cache.tasks = null;
     const response = await fetch(`/api/tasks/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -123,6 +139,7 @@ const DB = {
     return await response.json();
   },
   deleteTask: async (id) => {
+    _cache.tasks = null;
     await fetch(`/api/tasks/${id}`, { 
       method: 'DELETE',
       headers: getAuthHeaders()
@@ -135,12 +152,15 @@ const DB = {
 
   // --- Notes ---
   getNotes: async () => {
+    if (_cache.notes) return _cache.notes;
     const response = await fetch('/api/notes', {
       headers: getAuthHeaders()
     });
-    return await response.json();
+    _cache.notes = await response.json();
+    return _cache.notes;
   },
   addNote: async (n) => {
+    _cache.notes = null;
     n.id = 'n_' + Date.now();
     n.createdAt = new Date().toISOString();
     const response = await fetch('/api/notes', {
@@ -153,6 +173,7 @@ const DB = {
     return newNote;
   },
   updateNote: async (id, data) => {
+    _cache.notes = null;
     const response = await fetch(`/api/notes/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -161,6 +182,7 @@ const DB = {
     return await response.json();
   },
   deleteNote: async (id) => {
+    _cache.notes = null;
     await fetch(`/api/notes/${id}`, { 
       method: 'DELETE',
       headers: getAuthHeaders()

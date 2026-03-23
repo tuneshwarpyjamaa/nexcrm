@@ -3,10 +3,12 @@
 // =============================================
 
 async function renderDashboard() {
-  const contacts = await DB.getContacts();
-  const deals = await DB.getDeals();
-  const tasks = await DB.getTasks();
-  const notes = await DB.getNotes();
+  const [contacts, deals, tasks, notes] = await Promise.all([
+    DB.getContacts(),
+    DB.getDeals(),
+    DB.getTasks(),
+    DB.getNotes()
+  ]);
 
   const totalPipeline = deals.filter(d => d.stage !== 'Won' && d.stage !== 'Lost').reduce((s, d) => s + parseFloat(d.value || 0), 0);
   const wonValue = deals.filter(d => d.stage === 'Won').reduce((s, d) => s + parseFloat(d.value || 0), 0);

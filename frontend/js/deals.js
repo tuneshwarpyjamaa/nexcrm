@@ -16,8 +16,10 @@ function setView(v) {
 }
 
 async function renderDeals() {
-  const deals = await DB.getDeals();
-  const contacts = await DB.getContacts();
+  const [deals, contacts] = await Promise.all([
+    DB.getDeals(),
+    DB.getContacts()
+  ]);
 
   // Summary bar
   const active = deals.filter(d => d.stage !== 'Won' && d.stage !== 'Lost');
