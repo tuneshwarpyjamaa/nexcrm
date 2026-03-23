@@ -5,7 +5,7 @@ import jwt
 import os
 from typing import List
 from subscriptions.schemas import SubscriptionAction, SubscriptionDetails
-from db import get_db
+from db import get_db, close_db
 
 router = APIRouter(prefix="/api/subscriptions")
 
@@ -29,9 +29,9 @@ async def get_subscription(current_user_email: str = Depends(verify_token)):
     cursor = await db.execute("SELECT plan_name, subscription_status, subscription_end_date FROM users WHERE email = $1", current_user_email)
     row = await cursor.fetchone()
     if not row:
-        await db.close()
+        await close_db(db)
         raise HTTPException(status_code=404, detail="User not found")
-    await db.close()
+    await close_db(db)
     return {"plan_name": row[0], "subscription_status": row[1], "subscription_end_date": row[2]}
 
 @router.post("/subscribe")
@@ -48,7 +48,7 @@ async def create_subscription(action: SubscriptionAction, current_user_email: st
             (action.plan_name, end_date, current_user_email)
         )
         await db.commit()
-        await db.close()
+        await close_db(db)
         return {"success": True, "message": f"Successfully upgraded to {action.plan_name} plan", "end_date": end_date}
     elif action.action == "cancel":
         db = await get_db()
@@ -57,7 +57,7 @@ async def create_subscription(action: SubscriptionAction, current_user_email: st
             (current_user_email,)
         )
         await db.commit()
-        await db.close()
+        await close_db(db)
         return {"success": True, "message": "Subscription cancelled"}
     
     raise HTTPException(status_code=400, detail="Invalid action")

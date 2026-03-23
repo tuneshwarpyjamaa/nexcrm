@@ -7,7 +7,7 @@ import os
 from typing import List
 from tasks.schemas import Task, TaskCreate, TaskUpdate
 from simple_cache import get, set, clear_pattern
-from db import get_db
+from db import get_db, close_db
 
 router = APIRouter(prefix="/api")
 
@@ -54,7 +54,7 @@ async def get_tasks(current_user: str = Depends(verify_token)):
         set(cache_key_str, tasks)
         return tasks
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.post("/tasks", response_model=Task)
 async def create_task(task: TaskCreate, current_user: str = Depends(verify_token)):
@@ -82,7 +82,7 @@ async def create_task(task: TaskCreate, current_user: str = Depends(verify_token
         }
         return task_data
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.put("/tasks/{id}", response_model=Task)
 async def update_task(id: str, updates: TaskUpdate, current_user: str = Depends(verify_token)):
@@ -113,7 +113,7 @@ async def update_task(id: str, updates: TaskUpdate, current_user: str = Depends(
         'createdAt': str(row['createdAt']),
         'updatedAt': str(row['updatedAt'])
     }
-    await db.close()
+    await close_db(db)
     return task_data
 
 @router.delete("/tasks/{id}")
@@ -126,4 +126,4 @@ async def delete_task(id: str, current_user: str = Depends(verify_token)):
         await db.execute("DELETE FROM tasks WHERE id = $1", id)
         return {"success": True}
     finally:
-        await db.close()
+        await close_db(db)

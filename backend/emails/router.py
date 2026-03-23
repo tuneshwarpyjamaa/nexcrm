@@ -8,7 +8,7 @@ import uuid
 from typing import List
 from emails.schemas import Email, EmailCreate, EmailUpdate
 from simple_cache import get, set, clear_pattern
-from db import get_db
+from db import get_db, close_db
 
 router = APIRouter(prefix="/api")
 
@@ -40,6 +40,11 @@ TRACKING_PIXEL = bytes([
 
 @router.get("/emails", response_model=List[Email])
 async def get_emails(current_user: str = Depends(verify_token)):
+    cache_key_str = "emails"
+    cached_data = get(cache_key_str)
+    if cached_data is not None:
+        return cached_data
+
     db = await get_db()
     rows = await db.fetch('SELECT * FROM emails ORDER BY "sentAt" DESC')
     emails = []
@@ -60,14 +65,14 @@ async def get_emails(current_user: str = Depends(verify_token)):
             'sentAt': str(row['sentAt'])
         }
         emails.append(email)
-    await db.close()
+    await close_db(db)
     # Cache the result
-    cache_key_str = "emails"
     set(cache_key_str, emails)
     return emails
 
 @router.post("/emails", response_model=Email)
 async def create_email(email: EmailCreate, current_user: str = Depends(verify_token)):
+    clear_pattern("emails")
     id = f"e_{int(datetime.now().timestamp() * 1000)}"
     trackingId = str(uuid.uuid4())
     sentAt = datetime.now()
@@ -92,11 +97,12 @@ async def create_email(email: EmailCreate, current_user: str = Depends(verify_to
         'type': row['type'],
         'sentAt': str(row['sentAt']),
     }
-    await db.close()
+    await close_db(db)
     return email_data
 
 @router.put("/emails/{id}", response_model=Email)
 async def update_email(id: str, updates: EmailUpdate, current_user: str = Depends(verify_token)):
+    clear_pattern("emails")
     update_data = updates.dict(exclude_unset=True)
     
     set_clauses = []
@@ -125,14 +131,15 @@ async def update_email(id: str, updates: EmailUpdate, current_user: str = Depend
         'type': row['type'],
         'sentAt': str(row['sentAt']),
     }
-    await db.close()
+    await close_db(db)
     return email_data
 
 @router.delete("/emails/{id}")
 async def delete_email(id: str, current_user: str = Depends(verify_token)):
+    clear_pattern("emails")
     db = await get_db()
     await db.execute("DELETE FROM emails WHERE id = $1", id)
-    await db.close()
+    await close_db(db)
     return {"success": True}
 
 # Email tracking endpoint
@@ -146,7 +153,7 @@ async def track_email_open(tracking_id: str, request: Request):
             datetime.now(), tracking_id
         )
     finally:
-        await db.close()
+        await close_db(db)
     
     # Return transparent 1x1 GIF
     return Response(content=TRACKING_PIXEL, media_type="image/gif")
@@ -164,7 +171,7 @@ async def track_email_open(tracking_id: str, request: Request):
             datetime.now(), tracking_id
         )
     finally:
-        await db.close()
+        await close_db(db)
     
     # Return transparent 1x1 GIF
     return Response(content=TRACKING_PIXEL, media_type="image/gif")

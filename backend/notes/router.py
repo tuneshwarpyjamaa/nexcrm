@@ -7,7 +7,7 @@ import os
 from typing import List
 from notes.schemas import Note, NoteCreate, NoteUpdate
 from simple_cache import get, set, clear_pattern
-from db import get_db
+from db import get_db, close_db
 
 router = APIRouter(prefix="/api")
 
@@ -27,6 +27,11 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 
 @router.get("/notes", response_model=List[Note])
 async def get_notes(current_user: str = Depends(verify_token)):
+    cache_key_str = "notes"
+    cached_data = get(cache_key_str)
+    if cached_data is not None:
+        return cached_data
+
     db = await get_db()
     try:
         rows = await db.fetch('SELECT * FROM notes ORDER BY "createdAt" DESC')
@@ -43,14 +48,14 @@ async def get_notes(current_user: str = Depends(verify_token)):
             }
             notes.append(note)
         # Cache the result
-        cache_key_str = "notes"
         set(cache_key_str, notes)
         return notes
     finally:
-        await db.close()
+        await close_db(db)
 
 @router.post("/notes", response_model=Note)
 async def create_note(note: NoteCreate, current_user: str = Depends(verify_token)):
+    clear_pattern("notes")
     id = f"n_{int(datetime.now().timestamp() * 1000)}"
     createdAt = datetime.now()
     db = await get_db()
@@ -68,11 +73,12 @@ async def create_note(note: NoteCreate, current_user: str = Depends(verify_token
         'createdAt': str(row['createdAt']),
         'updatedAt': str(row['updatedAt'])
     }
-    await db.close()
+    await close_db(db)
     return note_data
 
 @router.put("/notes/{id}", response_model=Note)
 async def update_note(id: str, updates: NoteUpdate, current_user: str = Depends(verify_token)):
+    clear_pattern("notes")
     update_data = updates.dict(exclude_unset=True)
     update_data["updatedAt"] = datetime.now()
     
@@ -96,12 +102,13 @@ async def update_note(id: str, updates: NoteUpdate, current_user: str = Depends(
         'createdAt': str(row['createdAt']),
         'updatedAt': str(row['updatedAt'])
     }
-    await db.close()
+    await close_db(db)
     return note_data
 
 @router.delete("/notes/{id}")
 async def delete_note(id: str, current_user: str = Depends(verify_token)):
+    clear_pattern("notes")
     db = await get_db()
     await db.execute("DELETE FROM notes WHERE id = $1", id)
-    await db.close()
+    await close_db(db)
     return {"success": True}
