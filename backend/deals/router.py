@@ -10,16 +10,27 @@ from simple_cache import get, set, clear_pattern
 router = APIRouter(prefix="/api")
 
 
+_DB_COL = {
+    "contactId": "contactid",
+    "closeDate": "closedate",
+    "updatedAt": '"updatedAt"',
+}
+
+
+def _db_col(name: str) -> str:
+    return _DB_COL.get(name, name)
+
+
 def _row_to_deal(row) -> dict:
     return {
         "id": row["id"],
         "title": row["title"],
-        "contactId": row["contactId"],
+        "contactId": row["contactid"],
         "company": row["company"],
         "value": row["value"],
         "stage": row["stage"],
         "probability": row["probability"],
-        "closeDate": str(row["closeDate"]) if row["closeDate"] else None,
+        "closeDate": str(row["closedate"]) if row["closedate"] else None,
         "notes": row["notes"],
         "createdAt": str(row["createdAt"]) if row["createdAt"] else None,
         "updatedAt": str(row["updatedAt"]) if row["updatedAt"] else None,
@@ -46,7 +57,7 @@ async def create_deal(
     deal_id = f"d_{uuid.uuid4().hex}"
     created_at = datetime.now()
     await db.execute(
-        'INSERT INTO deals (id, title, "contactId", company, value, stage, probability, "closeDate", notes, "createdAt") '
+        'INSERT INTO deals (id, title, contactid, company, value, stage, probability, closedate, notes, "createdAt") '
         "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
         deal_id, deal.title, deal.contactId, deal.company, deal.value,
         deal.stage, deal.probability, deal.closeDate, deal.notes, created_at,
@@ -68,7 +79,7 @@ async def update_deal(
     update_data = updates.dict(exclude_unset=True)
     update_data["updatedAt"] = datetime.now()
 
-    set_clauses = [f'"{k}" = ${i + 1}' for i, k in enumerate(update_data.keys())]
+    set_clauses = [f'{_db_col(k)} = ${i + 1}' for i, k in enumerate(update_data.keys())]
     values = list(update_data.values()) + [deal_id]
     await db.execute(
         f'UPDATE deals SET {", ".join(set_clauses)} WHERE id = ${len(values)}',

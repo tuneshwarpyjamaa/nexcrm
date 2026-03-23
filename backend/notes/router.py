@@ -10,13 +10,24 @@ from simple_cache import get, set, clear_pattern
 router = APIRouter(prefix="/api")
 
 
+_DB_COL = {
+    "contactId": "contactid",
+    "contactName": "contactname",
+    "updatedAt": '"updatedAt"',
+}
+
+
+def _db_col(name: str) -> str:
+    return _DB_COL.get(name, name)
+
+
 def _row_to_note(row) -> dict:
     return {
         "id": row["id"],
         "title": row["title"],
         "body": row["body"],
-        "contactId": row["contactId"],
-        "contactName": row["contactName"],
+        "contactId": row["contactid"],
+        "contactName": row["contactname"],
         "createdAt": str(row["createdAt"]) if row["createdAt"] else None,
         "updatedAt": str(row["updatedAt"]) if row["updatedAt"] else None,
     }
@@ -43,7 +54,7 @@ async def create_note(
     note_id = f"n_{uuid.uuid4().hex}"
     created_at = datetime.now()
     await db.execute(
-        'INSERT INTO notes (id, title, body, "contactId", "contactName", "createdAt") '
+        'INSERT INTO notes (id, title, body, contactid, contactname, "createdAt") '
         "VALUES ($1, $2, $3, $4, $5, $6)",
         note_id, note.title, note.body, note.contactId, note.contactName, created_at,
     )
@@ -64,7 +75,7 @@ async def update_note(
     update_data = updates.dict(exclude_unset=True)
     update_data["updatedAt"] = datetime.now()
 
-    set_clauses = [f'"{k}" = ${i + 1}' for i, k in enumerate(update_data.keys())]
+    set_clauses = [f'{_db_col(k)} = ${i + 1}' for i, k in enumerate(update_data.keys())]
     values = list(update_data.values()) + [note_id]
     await db.execute(
         f'UPDATE notes SET {", ".join(set_clauses)} WHERE id = ${len(values)}',

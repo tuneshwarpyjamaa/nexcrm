@@ -10,13 +10,23 @@ from simple_cache import get, set, clear_pattern
 router = APIRouter(prefix="/api")
 
 
+_DB_COL = {
+    "contactId": "contactid",
+    "dueDate": "duedate",
+}
+
+
+def _db_col(name: str) -> str:
+    return _DB_COL.get(name, name)
+
+
 def _row_to_task(row) -> dict:
     # Task has no updatedAt column — only createdAt
     return {
         "id": row["id"],
         "title": row["title"],
-        "contactId": row["contactId"],
-        "dueDate": str(row["dueDate"]) if row["dueDate"] else None,
+        "contactId": row["contactid"],
+        "dueDate": str(row["duedate"]) if row["duedate"] else None,
         "priority": row["priority"],
         "done": bool(row["done"]),
         "createdAt": str(row["createdAt"]) if row["createdAt"] else None,
@@ -43,7 +53,7 @@ async def create_task(
     task_id = f"t_{uuid.uuid4().hex}"
     created_at = datetime.now()
     await db.execute(
-        'INSERT INTO tasks (id, title, "contactId", "dueDate", priority, done, "createdAt") '
+        'INSERT INTO tasks (id, title, contactid, duedate, priority, done, "createdAt") '
         "VALUES ($1, $2, $3, $4, $5, $6, $7)",
         task_id, task.title, task.contactId, task.dueDate,
         task.priority, task.done, created_at,
@@ -65,7 +75,7 @@ async def update_task(
     update_data = updates.dict(exclude_unset=True)
     # Task has NO updatedAt column — do not inject it
 
-    set_clauses = [f'"{k}" = ${i + 1}' for i, k in enumerate(update_data.keys())]
+    set_clauses = [f'{_db_col(k)} = ${i + 1}' for i, k in enumerate(update_data.keys())]
     values = list(update_data.values()) + [task_id]
     await db.execute(
         f'UPDATE tasks SET {", ".join(set_clauses)} WHERE id = ${len(values)}',
