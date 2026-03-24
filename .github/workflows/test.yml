@@ -170,20 +170,7 @@ jobs:
           PYTHONPATH: ./backend
         run: |
           cd backend
-          python -c "
-import sys
-sys.path.append('.')
-from tests.test_performance import test_concurrent_api_requests
-import asyncio
-import os
-os.environ['SECRET_KEY'] = 'test-secret-key-for-testing'
-try:
-    asyncio.run(test_concurrent_api_requests())
-    print('Performance tests completed successfully')
-except Exception as e:
-    print(f'Performance test error: {e}')
-    print('Continuing with pipeline...')
-" || echo "Performance tests skipped"
+          python tests/test_performance.py || echo "Performance tests skipped"
 
   # Security Tests
   security-tests:
@@ -274,23 +261,7 @@ except Exception as e:
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
         run: |
           cd backend
-          python -c "
-import asyncpg
-import asyncio
-import os
-
-async def test_db():
-    try:
-        conn = await asyncpg.connect(os.environ['DATABASE_URL'])
-        result = await conn.fetchval('SELECT 1')
-        await conn.close()
-        print('Database connection test passed')
-    except Exception as e:
-        print(f'Database connection test failed: {e}')
-        raise
-
-asyncio.run(test_db())
-"
+          python test_db_connection.py
 
   # Deploy (only on main branch)
   deploy:
@@ -305,19 +276,6 @@ asyncio.run(test_db())
       - name: Build Docker image
         run: |
           docker build -t nexcrm:latest .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}/frontend:latest
-            ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Deploy to staging
         run: |
