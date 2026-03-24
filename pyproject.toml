@@ -1,6 +1,6 @@
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --strict-markers --strict-config"
+addopts = "-ra -q --strict-markers --strict-config --tb=short"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
@@ -16,6 +16,7 @@ markers = [
     "database: marks tests as database tests",
     "asyncio: marks tests as async tests"
 ]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["backend"]
