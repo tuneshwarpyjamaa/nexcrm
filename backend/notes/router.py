@@ -46,6 +46,14 @@ async def get_notes(current_user: str = Depends(verify_token), db=Depends(get_db
     return notes
 
 
+@router.get("/notes/{note_id}", response_model=Note)
+async def get_note_by_id(note_id: str, current_user: str = Depends(verify_token), db=Depends(get_db)):
+    row = await db.fetchrow("SELECT * FROM notes WHERE id = $1", note_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return _row_to_note(row)
+
+
 @router.post("/notes", response_model=Note)
 async def create_note(
     note: NoteCreate, current_user: str = Depends(verify_token), db=Depends(get_db)

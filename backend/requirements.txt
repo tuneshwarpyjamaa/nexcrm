@@ -7,3 +7,37 @@ passlib[bcrypt]
 authlib
 httpx
 google-auth
+
+# Testing dependencies
+pytest
+pytest-cov
+pytest-asyncio
+pytest-mock
+pytest-xvfb
+pytest-timeout
+pytest-html
+pytest-benchmark
+
+# Performance testing
+locust
+
+# Security testing
+bandit
+safety
+semgrep
+pip-audit
+
+# Code quality
+flake8
+black
+isort
+mypy
+
+# Database testing
+alembic
+
+# Additional testing utilities
+factory-boy
+faker
+freezegun
+responses

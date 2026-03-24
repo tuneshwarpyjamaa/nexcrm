@@ -45,6 +45,14 @@ async def get_tasks(current_user: str = Depends(verify_token), db=Depends(get_db
     return tasks
 
 
+@router.get("/tasks/{task_id}", response_model=Task)
+async def get_task_by_id(task_id: str, current_user: str = Depends(verify_token), db=Depends(get_db)):
+    row = await db.fetchrow("SELECT * FROM tasks WHERE id = $1", task_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return _row_to_task(row)
+
+
 @router.post("/tasks", response_model=Task)
 async def create_task(
     task: TaskCreate, current_user: str = Depends(verify_token), db=Depends(get_db)

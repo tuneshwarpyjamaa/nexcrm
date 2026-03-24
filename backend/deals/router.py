@@ -49,6 +49,14 @@ async def get_deals(current_user: str = Depends(verify_token), db=Depends(get_db
     return deals
 
 
+@router.get("/deals/{deal_id}", response_model=Deal)
+async def get_deal_by_id(deal_id: str, current_user: str = Depends(verify_token), db=Depends(get_db)):
+    row = await db.fetchrow("SELECT * FROM deals WHERE id = $1", deal_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    return _row_to_deal(row)
+
+
 @router.post("/deals", response_model=Deal)
 async def create_deal(
     deal: DealCreate, current_user: str = Depends(verify_token), db=Depends(get_db)

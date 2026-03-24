@@ -40,6 +40,14 @@ async def get_contacts(current_user: str = Depends(verify_token), db=Depends(get
     return contacts
 
 
+@router.get("/contacts/{contact_id}", response_model=Contact)
+async def get_contact_by_id(contact_id: str, current_user: str = Depends(verify_token), db=Depends(get_db)):
+    row = await db.fetchrow("SELECT * FROM contacts WHERE id = $1", contact_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    return _row_to_contact(row)
+
+
 @router.post("/contacts", response_model=Contact)
 async def create_contact(
     contact: ContactCreate, current_user: str = Depends(verify_token), db=Depends(get_db)

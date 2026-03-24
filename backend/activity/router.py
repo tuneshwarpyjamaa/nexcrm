@@ -22,6 +22,14 @@ async def get_activity(current_user: str = Depends(verify_token), db=Depends(get
     return [_row_to_activity(r) for r in rows]
 
 
+@router.get("/activity/{activity_id}")
+async def get_activity_by_id(activity_id: int, current_user: str = Depends(verify_token), db=Depends(get_db)):
+    row = await db.fetchrow("SELECT * FROM activity WHERE id = $1", activity_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    return _row_to_activity(row)
+
+
 @router.post("/activity")
 async def create_activity(activity: dict, current_user: str = Depends(verify_token), db=Depends(get_db)):
     type_ = activity.get("type")

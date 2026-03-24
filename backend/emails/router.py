@@ -51,6 +51,14 @@ async def get_emails(current_user: str = Depends(verify_token), db=Depends(get_d
     return emails
 
 
+@router.get("/emails/{email_id}", response_model=Email)
+async def get_email_by_id(email_id: str, current_user: str = Depends(verify_token), db=Depends(get_db)):
+    row = await db.fetchrow("SELECT * FROM emails WHERE id = $1", email_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Email not found")
+    return _row_to_email(row)
+
+
 @router.post("/emails", response_model=Email)
 async def create_email(
     email: EmailCreate, current_user: str = Depends(verify_token), db=Depends(get_db)
