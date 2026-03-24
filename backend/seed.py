@@ -141,7 +141,7 @@ async def main():
     for e in emails:
         sent = now - timedelta(days=12 - emails.index(e), hours=emails.index(e) * 2)
         await db.execute(
-            'INSERT INTO emails (id, "to_email", subject, body, "trackingid", "opencount", "lastopenedat", "isread", "readat", direction, "contactid", type, "sentAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
+            'INSERT INTO emails (id, "to_email", subject, body, "trackingId", "openCount", "lastOpenedAt", "isRead", "readAt", direction, "contactId", type, "sentAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
             *e, sent,
         )
     print("[OK] 10 emails inserted (with tracking data)")
